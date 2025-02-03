@@ -1,14 +1,11 @@
 import { Container, Typography, Button, Card, CardMedia, CardContent } from "@mui/material";
 import Grid from "@mui/material/Grid2";
+import ImageCarousel from "../components/ImageCarousel";
 
 function HomePage() {
     return (
         <div>
-            <Container sx={{ my: 4 }}>
-                <Card>
-                    <CardMedia component="img" height="400" image="/banner-skincare.jpg" alt="Khuyến mãi Skincare" />
-                </Card>
-            </Container>
+            <ImageCarousel />
 
             <Container>
                 <Typography variant="h4" sx={{ my: 3 }}>Flash Sales</Typography>
@@ -29,7 +26,7 @@ function HomePage() {
             </Container>
 
             <Container>
-                <Typography variant="h4" sx={{ my: 3 }}>Sản phẩm bán chạy</Typography>
+                <Typography variant="h4" sx={{ my: 3 }}>Best selling product</Typography>
                 <Grid container spacing={3}>
                     {[1, 2, 3, 4].map((item) => (
                         <Grid key={item}>
@@ -53,7 +50,7 @@ function HomePage() {
             </Container >
 
             <Container  >
-                <Typography variant="h4" sx={{ my: 3 }}>Sản phẩm mới về</Typography>
+                <Typography variant="h4" sx={{ my: 3 }}>New product</Typography>
                 <Grid container spacing={3}>
                     {[1, 2, 3, 4].map((item) => (
                         <Grid key={item}>

@@ -5,7 +5,7 @@ function MainLayout({ children }: { children: React.ReactNode }) {
     return (
         <>
             <Header />
-            <main>{children}</main>
+            <main style={{ marginTop: '6em', marginBottom: '2em' }}>{children}</main>
             <Footer />
         </>
     )

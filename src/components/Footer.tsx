@@ -3,7 +3,7 @@ import Grid from "@mui/material/Grid2";
 
 const Footer = () => {
     return (
-        <Box component="footer" sx={{ backgroundColor: "#000", color: "#fff", py: 4 }}>
+        <Box component="footer" sx={{ backgroundColor: "#000", color: "#fff", py: 1 }}>
             <Container>
                 <Grid container spacing={4} sx={{ justifyContent: "space-between" }}>
                     <Grid >

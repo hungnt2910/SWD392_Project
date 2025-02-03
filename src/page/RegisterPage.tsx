@@ -68,13 +68,10 @@ function RegisterPage() {
             }}
         >
             <ToastContainer />
+
             <form onSubmit={handleRegister}>
                 <Box
                     sx={{
-                        padding: 4,
-                        boxShadow: 3,
-                        borderRadius: 2,
-                        backgroundColor: 'white',
                         display: 'flex',
                         flexDirection: 'column',
                         width: '100%',
@@ -84,15 +81,18 @@ function RegisterPage() {
                     }}
                 >
                     <Grid container spacing={3}>
-                        <Grid size={{ xs: 6, md: 5 }}>
-                            <Box sx={{ justifyContent: 'center', alignItems: 'center', textAlign: 'center' }}>
-                                <Box sx={{ marginBottom: '1rem', marginTop: '7rem' }}> <h1>Skincare Shop</h1></Box>
+                        <Grid size={{ xs: 12, md: 5 }} sx={{
+                            display: 'flex',
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                        }}>
+                            <Box sx={{ textAlign: 'center' }}>
                                 <img src={logo} alt="logo" style={{ width: '100%', height: 'auto' }} />
                             </Box>
                         </Grid>
-                        <Grid size={{ xs: 6, md: 7 }}>
+                        <Grid size={{ xs: 12, md: 7 }}>
                             <Typography variant="h4" align="center" gutterBottom>
-                                Register
+                                Create An Account
                             </Typography>
                             <TextField
                                 label="Email"
@@ -101,7 +101,8 @@ function RegisterPage() {
                                 fullWidth
                                 value={register.email}
                                 onChange={handleChange}
-                                sx={{ marginBottom: "2rem" }}
+                                sx={{ marginBottom: "1rem" }}
+                                variant="standard"
                                 required
                             />
                             <TextField
@@ -110,7 +111,8 @@ function RegisterPage() {
                                 fullWidth
                                 value={register.userName}
                                 onChange={handleChange}
-                                sx={{ marginBottom: "2rem" }}
+                                sx={{ marginBottom: "1rem" }}
+                                variant="standard"
                                 required
                             />
                             <TextField
@@ -119,7 +121,8 @@ function RegisterPage() {
                                 fullWidth
                                 value={register.phone}
                                 onChange={handleChange}
-                                sx={{ marginBottom: "2rem" }}
+                                sx={{ marginBottom: "1rem" }}
+                                variant="standard"
                                 required
                             />
                             <TextField
@@ -128,7 +131,8 @@ function RegisterPage() {
                                 fullWidth
                                 value={register.address}
                                 onChange={handleChange}
-                                sx={{ marginBottom: "2rem" }}
+                                sx={{ marginBottom: "1rem" }}
+                                variant="standard"
                                 required
                             />
                             <TextField
@@ -138,7 +142,8 @@ function RegisterPage() {
                                 fullWidth
                                 value={register.password}
                                 onChange={handleChange}
-                                sx={{ marginBottom: "2rem" }}
+                                sx={{ marginBottom: "1rem" }}
+                                variant="standard"
                                 required
                             />
                             <TextField
@@ -146,33 +151,45 @@ function RegisterPage() {
                                 label="Confirm Password"
                                 type="password"
                                 fullWidth
+                                sx={{ marginBottom: "1rem" }}
                                 value={confirmPassword}
+                                variant="standard"
                                 onChange={(e: ChangeEvent<HTMLInputElement>) => setConfirmPassword(e.target.value)}
                                 required
                             />
                             <Box sx={{
                                 display: 'flex',
+                                flexDirection: 'row',
+                                justifyContent: 'space-around',
+                                alignItems: 'center',
                                 gap: 2,
                             }}>
                                 <Button
                                     variant="contained"
                                     color="primary"
                                     fullWidth
-                                    onClick={() => nav('/login')}
-                                    sx={{ marginTop: "2rem" }}
-                                >
-                                    Back
-                                </Button>
-                                <Button
-                                    variant="contained"
-                                    color="primary"
-                                    fullWidth
                                     type="submit"
-                                    sx={{ marginTop: "2rem" }}
                                 >
-                                    Register
+                                    Create Account
                                 </Button>
+                                {/* login by gg */}
 
+                            </Box>
+
+                            <Box
+                                sx={{
+                                    display: 'flex',
+                                    textAlign: 'center',
+                                    justifyContent: 'center',
+                                    marginTop: '1rem'
+                                }}
+                            >
+                                <Typography sx={{ color: '#757575' }}>
+                                    Already have an account? &nbsp; &nbsp;
+                                </Typography>
+                                <Typography sx={{ textDecoration: 'underline', cursor: 'pointer', color: '#4D4D4D' }} onClick={() => nav('/login')}>
+                                    Login
+                                </Typography>
                             </Box>
                         </Grid>
                     </Grid>
