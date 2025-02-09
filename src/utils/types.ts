@@ -4,7 +4,5 @@ export interface LoginType {
 }
 
 export interface RegisterType extends LoginType {
-    userName: string,
-    phone: string,
-    address: string,
+    username: string,
 }

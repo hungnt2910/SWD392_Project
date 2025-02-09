@@ -7,6 +7,7 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { LoginType } from "../utils/types";
 import logo from '../assets/logo.png';
+import { portserver } from "../utils/portserver";
 
 function LoginPage() {
     const [login, setLogin] = useState<LoginType>({
@@ -26,17 +27,17 @@ function LoginPage() {
 
     const handleLogin = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        console.log(login)
-        axios.post('', login)
+        axios.post(`${portserver}auth/signin`, login)
             .then(res => {
                 console.log(res.data)
-                if (login.email === res.data[0]?.email && login.password === res.data[0]?.password) {
-                    toast.success("Login success")
-                    console.log("Login success")
-                    nav('/home')
+                if (res.data.accessToken !== null) {
+                    toast.success("Login success", {
+                        autoClose: 1500,
+                        onClose: () => nav('/home')
+                    })
+                    localStorage.setItem("token", res.data.accessToken)
                 } else {
                     toast.error("Login failed")
-                    console.log("Login failed")
                 }
             })
             .catch(err => {

@@ -1,16 +1,17 @@
 import { Route, Routes, Navigate } from "react-router-dom"
 import { Suspense, lazy } from "react"
 import MainLayout from "./page/MainLayout"
+import ShowAllProduct from "./page/ShowAllProduct"
 
 const LoginPage = lazy(() => import("./page/LoginPage"))
 const RegisterPage = lazy(() => import("./page/RegisterPage"))
-const HomePage = lazy(() => import("./page/HomePage"))
+const HomePage = lazy(() => import("./page/Home/HomePage"))
 const NotFoundPage = lazy(() => import("./page/NotFoundPage"))
+const CartPage = lazy(() => import("./page/CartPage"))
 
 function App() {
   const isAuthenticated = () => {
     return localStorage.getItem("token") ? true : false
-    // return true
   }
 
   const ProtectRoute = ({ children }: { children: JSX.Element }) => {
@@ -24,10 +25,11 @@ function App() {
         <Route path="/register" element={<RegisterPage />} />
 
         <Route path="/home" element={<MainLayout><HomePage /></MainLayout>} />
+        <Route path="/allproduct" element={<MainLayout><ShowAllProduct /></MainLayout>} />
 
         <Route path="/cart" element={
           <ProtectRoute>
-            <MainLayout><div>Cart Page</div></MainLayout>
+            <MainLayout><CartPage /></MainLayout>
           </ProtectRoute>
         } />
 

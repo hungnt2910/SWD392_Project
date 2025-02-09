@@ -7,14 +7,14 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import logo from '../assets/logo.png';
 import { RegisterType } from "../utils/types";
+import { portserver } from "../utils/portserver";
+
 
 function RegisterPage() {
     const [register, setRegister] = useState<RegisterType>({
         email: '',
         password: '',
-        userName: '',
-        phone: '',
-        address: ''
+        username: '',
     })
 
     const [confirmPassword, setConfirmPassword] = useState<string>('')
@@ -28,16 +28,13 @@ function RegisterPage() {
                 toast.error("Password not match")
                 return
             }
-            axios.post('', register)
+            axios.post(`${portserver}auth/signup`, register)
                 .then(res => {
-                    console.log(res.data)
-                    if (res.data === "success") {
+                    if (res.data.message === "Register success") {
                         toast.success("Register success")
-                        console.log("Register success")
                         nav('/login')
                     } else {
                         toast.error("Register failed")
-                        console.log("Register failed")
                     }
                 })
                 .catch(err => {
@@ -107,29 +104,9 @@ function RegisterPage() {
                             />
                             <TextField
                                 label="User Name"
-                                name="userName"
+                                name="username"
                                 fullWidth
-                                value={register.userName}
-                                onChange={handleChange}
-                                sx={{ marginBottom: "1rem" }}
-                                variant="standard"
-                                required
-                            />
-                            <TextField
-                                label="Phone"
-                                name="phone"
-                                fullWidth
-                                value={register.phone}
-                                onChange={handleChange}
-                                sx={{ marginBottom: "1rem" }}
-                                variant="standard"
-                                required
-                            />
-                            <TextField
-                                label="Address"
-                                name="address"
-                                fullWidth
-                                value={register.address}
+                                value={register.username}
                                 onChange={handleChange}
                                 sx={{ marginBottom: "1rem" }}
                                 variant="standard"
