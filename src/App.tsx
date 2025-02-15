@@ -1,34 +1,43 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { Route, Routes, Navigate } from "react-router-dom"
+import { Suspense, lazy } from "react"
+import MainLayout from "./page/MainLayout"
+import ShowAllProduct from "./page/ShowAllProduct"
+
+const LoginPage = lazy(() => import("./page/LoginPage"))
+const RegisterPage = lazy(() => import("./page/RegisterPage"))
+const HomePage = lazy(() => import("./page/Home/HomePage"))
+const NotFoundPage = lazy(() => import("./page/NotFoundPage"))
+const CartPage = lazy(() => import("./page/CartPage"))
 
 function App() {
-  const [count, setCount] = useState(0)
+  const isAuthenticated = () => {
+    return localStorage.getItem("token") ? true : false
+  }
+
+  const ProtectRoute = ({ children }: { children: JSX.Element }) => {
+    return isAuthenticated() ? children : <LoginPage />
+  }
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
+    <Suspense fallback={<div>Loading...</div>}>
+      <Routes>
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/register" element={<RegisterPage />} />
+
+        <Route path="/home" element={<MainLayout><HomePage /></MainLayout>} />
+        <Route path="/allproduct" element={<MainLayout><ShowAllProduct /></MainLayout>} />
+
+        <Route path="/cart" element={
+          <ProtectRoute>
+            <MainLayout><CartPage /></MainLayout>
+          </ProtectRoute>
+        } />
+
+        <Route path="/" element={<Navigate to={'/home'} />} />
+
+        <Route path="*" element={<NotFoundPage />} />
+      </Routes>
+    </Suspense>
   )
 }
 
