@@ -1,13 +1,15 @@
-import { Box, Button, Container, TextField, Typography } from "@mui/material"
-import Grid from '@mui/material/Grid2';
+import { Box, Button, Container, IconButton, InputAdornment, TextField, Typography } from "@mui/material"
 import { ChangeEvent, useState } from "react"
 import axios from 'axios';
 import { useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { LoginType } from "../utils/types";
-import logo from '../assets/logo.png';
 import { portserver } from "../utils/portserver";
+import background from '../assets/cosmetic-background.jpg';
+import React from "react";
+import { VisibilityOff, Visibility } from "@mui/icons-material";
+
 
 function LoginPage() {
     const [login, setLogin] = useState<LoginType>({
@@ -24,6 +26,30 @@ function LoginPage() {
             [name]: value
         })
     }
+
+    const [password, setPassword] = React.useState("");
+    const [email, setEmail] = React.useState("");
+
+
+    const validatePassword = (inputPassword: string): boolean => {
+        const regex = /^(?!\d)[A-Za-z\d@$!%*?&#]{8,}$/;
+        return regex.test(inputPassword);
+    };
+
+    const validateEmail = (inputEmail: string): boolean => {
+        const regex = /^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/
+        return regex.test(inputEmail);
+    };
+
+    const [showPassword, setShowPassword] = React.useState(false);
+
+    const handleClickShowPassword = () => setShowPassword((show) => !show);
+
+    const handleMouseDownPassword = (
+        event: React.MouseEvent<HTMLButtonElement>
+    ) => {
+        event.preventDefault();
+    };
 
     const handleLogin = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -46,104 +72,150 @@ function LoginPage() {
             })
     }
 
+
     return (
         <Container
-            maxWidth="md"
+            maxWidth={false} // Full width
+            disableGutters // Remove padding
             sx={{
                 display: 'flex',
-                flexDirection: 'column',
                 justifyContent: 'center',
-                minHeight: '100vh',
+                alignItems: 'center',
+                width: '100vw', // Full viewport width
+                height: '100vh', // Full viewport height
+                backgroundImage: `url(${background})`,
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+                backgroundRepeat: 'no-repeat',
             }}
         >
             <ToastContainer />
-            <form onSubmit={handleLogin}>
 
-                <Box
-                    sx={{
-                        display: 'flex',
-                        flexDirection: 'column',
-                        width: '100%',
-                        height: '40em',
-                        justifyContent: 'center',
-                        alignItems: 'center'
-                    }}
-                >
-                    <Grid container spacing={3}>
-                        <Grid size={{ xs: 12, md: 5 }} sx={{
+            {/* Centered Login Form */}
+            <Box
+                sx={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    width: '100%',
+                    maxWidth: '400px', // Adjust width for better centering
+                    padding: '2rem',
+                }}
+            >
+                <form onSubmit={handleLogin} style={{ width: '100%' }}>
+                    <Typography variant="h4" align="center" gutterBottom>
+                        Log In
+                    </Typography>
+
+                    <TextField
+                        label="Email"
+                        type="email"
+                        name="email"
+                        placeholder="abc@domain.com"
+                        fullWidth
+                        value={email}
+                        //onChange={handleChange}
+                        sx={{ marginBottom: "2rem" }}
+                        variant="standard"
+                        required
+                        onChange={(e) => setEmail(e.target.value)}
+                        error={!!email && !validateEmail(email)}
+                        helperText={
+                            email && !validateEmail(email)
+                                ? "Địa chỉ email không hợp lệ"
+                                : ""
+                        }
+                    />
+
+                    <TextField
+                        name="password"
+                        label="Password"
+                        type={showPassword ? "text" : "password"}
+                        id="password"
+                        autoComplete="off"
+                        fullWidth
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        sx={{ marginBottom: "1rem" }}
+                        variant="standard"
+                        required
+                        error={!!password && !validatePassword(password)}
+                        helperText={
+                            password && !validatePassword(password)
+                                ? "Mật khẩu phải có tối thiểu 8 kí tự và không bắt đầu bằng số."
+                                : ""
+                        }
+                        slotProps={{
+                            input: {
+                                endAdornment: (
+                                    <InputAdornment position="end">
+                                        <IconButton
+                                            aria-label="toggle password visibility"
+                                            onClick={handleClickShowPassword}
+                                            onMouseDown={handleMouseDownPassword}
+                                            edge="end"
+                                        >
+                                            {showPassword ? <VisibilityOff /> : <Visibility />}
+                                        </IconButton>
+                                    </InputAdornment>
+                                ),
+                            },
+                        }}
+                    />
+                    <Button
+                        variant="contained"
+                        color="primary"
+                        fullWidth
+                        type="submit"
+                        sx={{ marginTop: "2rem" }}
+                    >
+                        Login
+                    </Button>
+
+                    <Box
+                        sx={{
                             display: 'flex',
+                            textAlign: 'center',
                             justifyContent: 'center',
-                            alignItems: 'center',
-                        }}>
-                            <Box sx={{ textAlign: 'center' }}>
-                                <img src={logo} alt="logo" style={{ width: '100%', height: 'auto' }} />
-                            </Box>
-                        </Grid>
-                        <Grid size={{ xs: 12, md: 7 }}>
-                            <Typography variant="h4" align="center" gutterBottom>
-                                Log in to Skincare Shop
-                            </Typography>
-                            <TextField
-                                label="Email"
-                                type="email"
-                                name="email"
-                                fullWidth
-                                value={login.email}
-                                onChange={handleChange}
-                                sx={{ marginBottom: "2rem" }}
-                                variant="standard"
-                                required
-                            />
-                            <TextField
-                                name="password"
-                                label="Password"
-                                type="password"
-                                fullWidth
-                                value={login.password}
-                                onChange={handleChange}
-                                variant="standard"
-                                required
-                            />
-                            <Box sx={{
-                                display: 'flex',
-                                flexDirection: 'row',
-                                justifyContent: 'space-around',
-                                alignItems: 'center',
-                                gap: 2,
-                                marginTop: '2rem'
-                            }}>
-                                <Button
-                                    variant="contained"
-                                    color="primary"
-                                    type="submit"
-                                    sx={{ width: '10rem' }}
-                                >
-                                    Login
-                                </Button>
-                                <Box>
-                                    <Typography sx={{ textDecoration: 'underline', cursor: 'pointer', color: '#1565C0' }}>
-                                        Forget Password?
-                                    </Typography>
-                                </Box>
-                            </Box>
-                            <Box
-                                sx={{
-                                    display: 'flex',
-                                    textAlign: 'center',
-                                    justifyContent: 'center',
-                                    marginTop: '1.5rem'
-                                }}
-                            >
-                                <Typography sx={{ textDecoration: 'underline', cursor: 'pointer', color: '#4D4D4D' }} onClick={() => nav('/register')}>
-                                    Create an account?
-                                </Typography>
-                            </Box>
-                        </Grid>
-                    </Grid>
-                </Box >
-            </form>
-        </Container >
-    )
+                            marginTop: '1.5rem'
+                        }}
+                    >
+                        <Typography
+                            sx={{
+                                textDecoration: 'underline',
+                                cursor: 'pointer',
+                                color: '#1565C0'
+                            }}
+                        >
+                            Forgot Password?
+                        </Typography>
+                    </Box>
+
+                    <Box
+                        sx={{
+                            display: 'flex',
+                            textAlign: 'center',
+                            justifyContent: 'center',
+                            marginTop: '1.5rem'
+                        }}
+                    >
+                        <Typography
+                            sx={{
+                                textDecoration: 'underline',
+                                cursor: 'pointer',
+                                color: '#4D4D4D'
+                            }}
+                            onClick={() => nav('/register')}
+                        >
+                            Create an account?
+                        </Typography>
+                    </Box>
+                </form>
+            </Box>
+        </Container>
+    );
+
 }
 
 export default LoginPage
