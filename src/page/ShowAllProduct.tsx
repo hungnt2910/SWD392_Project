@@ -1,20 +1,33 @@
-import { Container, Typography, Button, Card, CardMedia, CardContent } from "@mui/material";
+import { Container, Typography, Button, Card, CardMedia, CardContent, Pagination } from "@mui/material";
 import Grid from "@mui/material/Grid";
 import { Box } from "@mui/system";
+import { useEffect, useState } from "react";
+
+
+const products = Array.from({ length: 77 }, (_, i) => i + 1);
+
 
 function ShowAllProduct() {
+    useEffect(() => {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+    }, []);
+
+    const itemsPerpage = 20;
+    const [page, setPage] = useState(1);
+
+    const startIndex = (page - 1) * itemsPerpage;
+    const displayedProducts = products.slice(startIndex, startIndex + itemsPerpage);
+
+
     return (
         <Container>
-            <Box sx={{ marginBottom: '2em' }}>
-                {["ALL", "Brand 1", "Brand 2", "Brand 3", "Brand 4", "Brand 5"].map((item) => (
-                    <Button variant="outlined" key={item} sx={{ mr: 1 }}>{item}</Button>
-                ))
-                }
-            </Box>
+            {["ALL", "Brand 1", "Brand 2", "Brand 3", "Brand 4", "Brand 5"].map((item) => (
+                <Button variant="outlined" key={item} sx={{ mr: 1 }}>{item}</Button>
+            ))}
 
-            <Grid container spacing={4}>
-                {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20].map((item) => (
-                    <Grid item md={3} sm={6} xs={12} sx={{ textAlign: 'center' }} key={item}>
+            <Grid container spacing={4} sx={{ mt: 2 }}>
+                {displayedProducts.map((item) => (
+                    <Grid item md={3} sm={6} xs={12} sx={{ textAlign: "center" }} key={item}>
                         <Card>
                             <CardMedia component="img" height="150" image="/new-arrival.jpg" alt="Sản phẩm mới về" />
                             <CardContent>
@@ -26,8 +39,17 @@ function ShowAllProduct() {
                     </Grid>
                 ))}
             </Grid>
+
+            {/* Phân trang */}
+            <Pagination
+                count={Math.ceil(products.length / itemsPerpage)} // Tổng số trang
+                page={page}
+                onChange={(_, value) => setPage(value)}
+                color="primary"
+                sx={{ mt: 3, display: "flex", justifyContent: "center" }}
+            />
         </Container>
-    )
+    );
 }
 
 export default ShowAllProduct
