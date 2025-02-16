@@ -55,12 +55,13 @@ function LoginPage() {
         e.preventDefault();
         axios.post(`${portserver}auth/signin`, login)
             .then(res => {
-                if (res.data?.accessToken) {
+                console.log(res.data)
+                if (res.data.accessToken !== null) {
                     toast.success("Login success", {
                         autoClose: 1500,
                         onClose: () => nav('/home')
                     })
-                    localStorage.setItem("token", JSON.stringify(res.data.accessToken))
+                    localStorage.setItem("token", res.data.accessToken)
                 } else {
                     toast.error("Login failed")
                 }
