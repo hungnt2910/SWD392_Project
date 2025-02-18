@@ -30,7 +30,7 @@ const Header = () => {
 
                     <Box sx={{ display: "flex", gap: 2 }}>
                         <Button color="inherit" component={Link} to="/">Home</Button>
-                        <Button color="inherit" component={Link} to="/about">About</Button>
+                        {/* <Button color="inherit" component={Link} to="/about">About</Button> */}
                         <Button color="inherit" component={Link} to="/contact">Contact</Button>
                         <Button color="inherit" component={Link} to="/register">Sign Up</Button>
                     </Box>
