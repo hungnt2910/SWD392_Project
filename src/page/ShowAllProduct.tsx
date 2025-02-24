@@ -1,10 +1,9 @@
 import { Container, Typography, Button, Card, CardMedia, CardContent, Pagination } from "@mui/material";
 import Grid from "@mui/material/Grid";
-import { Box } from "@mui/system";
 import { useEffect, useState } from "react";
 
 
-const products = Array.from({ length: 77 }, (_, i) => i + 1);
+const products = Array.from({ length: 200 }, (_, i) => i + 1);
 
 
 function ShowAllProduct() {
@@ -40,12 +39,13 @@ function ShowAllProduct() {
                 ))}
             </Grid>
 
-            {/* Phân trang */}
             <Pagination
-                count={Math.ceil(products.length / itemsPerpage)} // Tổng số trang
+                count={Math.ceil(products.length / itemsPerpage)}
                 page={page}
                 onChange={(_, value) => setPage(value)}
                 color="primary"
+                boundaryCount={3}
+                siblingCount={0}
                 sx={{ mt: 3, display: "flex", justifyContent: "center" }}
             />
         </Container>

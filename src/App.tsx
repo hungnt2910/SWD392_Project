@@ -2,6 +2,8 @@ import { Route, Routes, Navigate } from "react-router-dom"
 import { Suspense, lazy } from "react"
 import MainLayout from "./page/MainLayout"
 import ShowAllProduct from "./page/ShowAllProduct"
+import ProductDetails from "./page/ProductDetails"
+import ContactPage from "./page/ContactPage"
 import Dashboard from "./dashboard/Dashboard";
 import StaffLayout from "./dashboard/layouts/StaffLayout";
 import ManageMembers from "./dashboard/pages/staff/ManageMembers";
@@ -31,6 +33,9 @@ function App() {
 
         <Route path="/home" element={<MainLayout><HomePage /></MainLayout>} />
         <Route path="/allproduct" element={<MainLayout><ShowAllProduct /></MainLayout>} />
+        <Route path="/productdetail/:id" element={<MainLayout><ProductDetails /></MainLayout>} />
+        <Route path="/contact" element={<MainLayout><ContactPage /></MainLayout>} />
+
 
         <Route path="/dashboard/staff" element={<StaffLayout />}>
           <Route path="members" element={<ManageMembers/>} />
