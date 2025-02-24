@@ -3,14 +3,16 @@ import { styled } from '@mui/material/styles';
 //import Avatar from '@mui/material/Avatar';
 import MuiDrawer, { drawerClasses } from '@mui/material/Drawer';
 import Box from '@mui/material/Box';
-import Divider from '@mui/material/Divider';
+//import Divider from '@mui/material/Divider';
 import Stack from '@mui/material/Stack';
 //import Typography from '@mui/material/Typography';
-import SelectContent from './SelectContent';
+//import SelectContent from './SelectContent';
 import MenuContent from './MenuContent';
+import StaffMenuContent from '../layouts/StaffMenuContent';
 //import OptionsMenu from './OptionsMenu';
 
 const drawerWidth = 240;
+
 
 const Drawer = styled(MuiDrawer)({
   width: drawerWidth,
@@ -34,16 +36,22 @@ export default function SideMenu() {
         },
       }}
     >
-      <Box
+
+      <Box sx={{display: 'flex' ,p: 1.5, borderBottom: '1px solid', borderColor: 'divider' }}>
+        <p>Menu</p>
+      </Box>
+
+
+      {/* <Box
         sx={{
-          display: 'flex',
+          ,
           mt: 'calc(var(--template-frame-height, 0px) + 4px)',
           p: 1.5,
         }}
       >
         <SelectContent />
       </Box>
-      <Divider />
+      <Divider /> */}
       <Box
         sx={{
           overflow: 'auto',
@@ -52,21 +60,10 @@ export default function SideMenu() {
           flexDirection: 'column',
         }}
       >
-        <MenuContent />
+        <StaffMenuContent />
 
       </Box>
-      <Stack
-        direction="row"
-        sx={{
-          p: 2,
-          gap: 1,
-          alignItems: 'center',
-          borderTop: '1px solid',
-          borderColor: 'divider',
-        }}
-      >
 
-      </Stack>
     </Drawer>
   );
 }
