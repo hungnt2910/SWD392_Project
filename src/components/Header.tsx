@@ -10,9 +10,20 @@ import {
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useCart } from "../hooks/useCart";
+import { useState } from "react";
 
 const Header = () => {
+    const nav = useNavigate();
+    const { cart } = useCart()
+    const [search, setSearch] = useState<string>("");
+
+    const handleSearch = async () => {
+        if (!search.trim()) return;
+        nav(`/searchproduct?search=${encodeURIComponent(search)}`);
+    }
+
     return (
         <AppBar position="fixed" color="default" sx={{ boxShadow: 2 }}>
             <Container>
@@ -30,23 +41,31 @@ const Header = () => {
 
                     <Box sx={{ display: "flex", gap: 2 }}>
                         <Button color="inherit" component={Link} to="/">Home</Button>
-                        {/* <Button color="inherit" component={Link} to="/about">About</Button> */}
                         <Button color="inherit" component={Link} to="/contact">Contact</Button>
                         <Button color="inherit" component={Link} to="/register">Sign Up</Button>
+                        <Button color="inherit" component={Link} to="/quiz">Quiz</Button>
                     </Box>
 
                     <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                        <TextField variant="outlined" size="small" placeholder="Search..." sx={{ width: 300 }} />
-                        <IconButton color="inherit">
+                        <TextField
+                            variant="outlined"
+                            size="small"
+                            placeholder="Search..."
+                            sx={{ width: 300 }}
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
+                            onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+                        />
+                        <IconButton color="inherit" onClick={handleSearch}>
                             <SearchIcon />
                         </IconButton>
-                        <IconButton color="inherit">
-                            <ShoppingCartIcon />
-                        </IconButton>
+                        <Button startIcon={<ShoppingCartIcon />} onClick={() => nav("/cart")}>
+                            ({cart.reduce((total, item) => total + item.quantity, 0)})
+                        </Button>
                     </Box>
                 </Toolbar>
             </Container>
-        </AppBar>
+        </AppBar >
     );
 };
 

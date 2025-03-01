@@ -4,6 +4,8 @@ import MainLayout from "./page/MainLayout"
 import ShowAllProduct from "./page/ShowAllProduct"
 import ProductDetails from "./page/ProductDetails"
 import ContactPage from "./page/ContactPage"
+import QuizPage from "./page/QuizPage"
+import SearchPage from "./page/SearchPage"
 
 const LoginPage = lazy(() => import("./page/LoginPage"))
 const RegisterPage = lazy(() => import("./page/RegisterPage"))
@@ -30,6 +32,13 @@ function App() {
         <Route path="/allproduct" element={<MainLayout><ShowAllProduct /></MainLayout>} />
         <Route path="/productdetail/:id" element={<MainLayout><ProductDetails /></MainLayout>} />
         <Route path="/contact" element={<MainLayout><ContactPage /></MainLayout>} />
+        <Route path="/quiz" element={
+          <ProtectRoute>
+            <MainLayout><QuizPage /></MainLayout>
+          </ProtectRoute>
+        } />
+
+        <Route path="/searchproduct" element={<MainLayout><SearchPage /></MainLayout>} />
 
         <Route path="/cart" element={
           <ProtectRoute>

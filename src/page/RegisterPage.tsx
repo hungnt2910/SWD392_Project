@@ -5,19 +5,12 @@ import { useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import background from '../assets/cosmetic-background.jpg';
-import { RegisterType } from "../utils/types";
 import { portserver } from "../utils/portserver";
 import React from "react";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 
 
 function RegisterPage() {
-    const [register, setRegister] = useState<RegisterType>({
-        email: '',
-        password: '',
-        username: '',
-    })
-
     const [confirmPassword, setConfirmPassword] = useState<string>('')
 
     const nav = useNavigate()
@@ -25,11 +18,11 @@ function RegisterPage() {
     const handleRegister = (e: React.FormEvent<HTMLFormElement>) => {
         try {
             e.preventDefault();
-            if (register.password !== confirmPassword) {
+            if (password !== confirmPassword) {
                 toast.error("Password not match")
                 return
             }
-            axios.post(`${portserver}auth/signup`, register)
+            axios.post(`${portserver}/auth/signup`, { username, email, password })
                 .then(res => {
                     if (res.data.message === "Register success") {
                         toast.success("Register success")
@@ -47,15 +40,6 @@ function RegisterPage() {
         }
     }
 
-    const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-        const { name, value } = e.target
-        setRegister({
-            ...register,
-            [name]: value
-        })
-    }
-
-    //add eye-icon to password
     const [showPassword, setShowPassword] = React.useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = React.useState(false);
 
@@ -70,7 +54,6 @@ function RegisterPage() {
         event.preventDefault();
     };
 
-    //validate username and password
     const [username, setUsername] = React.useState("");
     const [password, setPassword] = React.useState("");
     const [email, setEmail] = React.useState("");
@@ -93,14 +76,14 @@ function RegisterPage() {
 
     return (
         <Container
-            maxWidth={false} // Full width
-            disableGutters // Remove padding
+            maxWidth={false}
+            disableGutters
             sx={{
                 display: 'flex',
                 justifyContent: 'center',
                 alignItems: 'center',
-                width: '100vw', // Full viewport width
-                height: '100vh', // Full viewport height
+                width: '100vw',
+                height: '100vh',
                 backgroundImage: `url(${background})`,
                 backgroundSize: 'cover',
                 backgroundPosition: 'center',
@@ -109,7 +92,6 @@ function RegisterPage() {
         >
             <ToastContainer />
 
-            {/* Centered Form */}
             <Box
                 sx={{
                     display: 'flex',
@@ -117,7 +99,7 @@ function RegisterPage() {
                     justifyContent: 'center',
                     alignItems: 'center',
                     width: '100%',
-                    maxWidth: '400px', // Adjust width for better centering
+                    maxWidth: '400px',
                     padding: '2rem',
                 }}
             >
@@ -133,7 +115,6 @@ function RegisterPage() {
                         placeholder="abc@domain.com"
                         fullWidth
                         value={email}
-                        //onChange={handleChange}
                         sx={{ marginBottom: "1rem" }}
                         variant="standard"
                         required

@@ -1,1 +1,1 @@
-export const portserver = "http://localhost:5001/";;
+export const portserver = "http://localhost:5001";;
