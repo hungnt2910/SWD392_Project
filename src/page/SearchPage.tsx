@@ -1,19 +1,28 @@
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { useEffect, useState } from "react";
+import axios from "axios";
+import { portserver } from "../utils/portserver";
 import { Container, Typography, Button, Card, CardMedia, CardContent, Pagination } from "@mui/material";
 import Grid from "@mui/material/Grid";
-import axios from "axios";
-import { useEffect, useState } from "react";
-import { portserver } from "../utils/portserver";
 import { Box } from "@mui/system";
-import { useNavigate } from "react-router-dom";
 import { Brand, Product } from "../utils/types";
-import { useCart } from "../hooks/useCart";
 
-
-function ShowAllProduct() {
+const SearchPage = () => {
+    const [searchParams] = useSearchParams();
+    const searchQuery = searchParams.get("search") || "";
     const [products, setProducts] = useState<Product[]>([]);
     const [brand, setbrand] = useState<Brand[]>([]);
     const nav = useNavigate();
-    const { addProduct } = useCart()
+
+    const getAllBrand = async () => {
+        await axios.get(`${portserver}/brand`)
+            .then((res) => {
+                setbrand([{ brandId: 0, brandName: "ALL", country: "", logo: "" }, ...res.data])
+            })
+            .catch(err => {
+                console.log(err)
+            })
+    }
 
     const getAllProducts = async () => {
         await axios.get(`${portserver}/skincare-product`)
@@ -39,21 +48,22 @@ function ShowAllProduct() {
         }
     }
 
-    const getAllBrand = async () => {
-        await axios.get(`${portserver}/brand`)
-            .then((res) => {
-                setbrand([{ brandId: 0, brandName: "ALL", country: "", logo: "" }, ...res.data])
-            })
-            .catch(err => {
-                console.log(err)
-            })
-    }
+    useEffect(() => { getAllBrand(); }, []);
 
     useEffect(() => {
-        getAllProducts();
-        getAllBrand();
-        window.scrollTo({ top: 0, behavior: "smooth" });
-    }, []);
+        if (!searchQuery.trim()) return;
+
+        const fetchSearchResults = async () => {
+            try {
+                const res = await axios.get(`${portserver}/skincare-product/search/byname?productname=${searchQuery}`);
+                setProducts(res.data);
+            } catch (error) {
+                console.error("Error fetching search results:", error);
+            }
+        };
+
+        fetchSearchResults();
+    }, [searchQuery]);
 
     const itemsPerpage = 20;
     const [page, setPage] = useState(1);
@@ -61,10 +71,8 @@ function ShowAllProduct() {
     const startIndex = (page - 1) * itemsPerpage;
     const displayedProducts = products.slice(startIndex, startIndex + itemsPerpage);
 
-
     return (
         <Container>
-            {/* {[{ brandId: 0, brandName: "ALL", country: "", logo: "" }, ...brand].map((item) => ( */}
             {brand.map((item) => (
                 <Button variant="outlined" key={item.brandId} sx={{ mr: 1, my: 1 }}
                     onClick={() => getProByBrand({ brandname: item.brandName })}
@@ -77,7 +85,7 @@ function ShowAllProduct() {
                 {displayedProducts.map((item) => (
                     <Grid item md={3} sm={6} xs={12} key={item.productId}>
                         <Card sx={{
-                            display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center", height: "100%", transition: "0.3s", border: "1px solid rgb(194, 192, 192)",
+                            display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center", height: "100%", transition: "0.3s",
                             '&:hover': {
                                 border: "1px solid rgb(25, 167, 210)"
                             }
@@ -92,12 +100,7 @@ function ShowAllProduct() {
                                         <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>{item.price} VND</Typography>
                                     </Box>
                                     <Box>
-                                        <Button variant="contained" fullWidth onClick={() => addProduct({
-                                            productId: item.productId,
-                                            productName: item.productName,
-                                            price: item.price,
-                                            quantity: 1
-                                        })}>Buy Now</Button>
+                                        <Button variant="contained" fullWidth>Buy Now</Button>
                                     </Box>
                                 </Box>
                             </CardContent>
@@ -117,6 +120,6 @@ function ShowAllProduct() {
             />
         </Container>
     );
-}
+};
 
-export default ShowAllProduct
+export default SearchPage;
