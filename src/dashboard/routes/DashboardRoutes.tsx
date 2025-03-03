@@ -4,6 +4,7 @@ import DashboardLogin from "../pages/common/login";
 import NotFoundPage from "../pages/common/NotFoundPage";
 import ManageGoods from "../pages/staff/ManageGoods";
 import ManageMembers from "../pages/staff/ManageMembers";
+import OrderList from "../pages/staff/OrderList";
 import { useEffect, useState } from "react";
 
 // Protected Route Component
@@ -57,6 +58,7 @@ export default function DashboardRoutes() {
         <Route index element={<Navigate to="members" replace />} />
         <Route path="members" element={<ManageMembers />} />
         <Route path="goods" element={<ManageGoods />} />
+        <Route path="orders/all" element={<OrderList />} />
       </Route>
 
       {/* Admin Routes */}
