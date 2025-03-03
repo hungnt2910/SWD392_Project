@@ -114,21 +114,21 @@ export default function ManageMembers() {
       headerName: 'Name',
       flex: 1,
       minWidth: 120,
-      editable: true,
+      editable: false,
     },
     {
       field: 'phone',
       headerName: 'Phone',
       flex: 1,
       minWidth: 120,
-      editable: true,
+      editable: false,
     },
     {
       field: 'address',
       headerName: 'Address',
       flex: 1.5,
       minWidth: 150,
-      editable: true,
+      editable: false,
     },
     {
       field: 'status',
@@ -156,7 +156,7 @@ export default function ManageMembers() {
       type: 'number',
       flex: 0.8,
       minWidth: 100,
-      editable: true,
+      editable: false,
       headerAlign: 'center',
       align: 'center'
     },

@@ -62,78 +62,77 @@ function DashboardLogin() {
   const handleLogin = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
-
-    // Update login object with current email and password
+  
+    // Create login data object
     const loginData = {
       email,
       password,
     };
-
+  
     axios
-      .post(`${portserver}auth/signin`, loginData)
+      .post(`${portserver}/auth/signin`, loginData)
       .then((res) => {
-        console.log(res.data);
-        if (res.data.accessToken !== null) {
-          const { accessToken, roleId } = res.data;
-
+        console.log("API response:", res.data);
+        
+        // Check if accessToken exists in response
+        if (res.data.accessToken !== undefined && res.data.accessToken !== null) {
+          const accessToken = res.data.accessToken;
+          
+          // Store token in localStorage
           localStorage.setItem("token", accessToken);
-
-        let roleIdd = 0;
-        let roleName;
-        let dashboardPath;
-
-        //   switch (roleId) {
-        //     case 1:
-        //       roleName = "admin";
-        //       dashboardPath = "/dashboard/admin";
-        //       break;
-        //     case 3:
-        //       roleName = "staff";
-        //       dashboardPath = "/dashboard/staff";
-        //       break;
-        //     case 4:
-        //       roleName = "shipper";
-        //       dashboardPath = "/dashboard/shipper";
-        //       break;
-        //     default:
-        //       toast.error("You do not have permission to access the dashboard");
-        //       setLoading(false);
-        //       return;
-        //   }
-        if (email.startsWith("admin")) {
-            roleIdd = 1;
+          
+          // Determine role based on email prefix for demo purposes
+          let roleId = 0;
+          let roleName;
+          let dashboardPath;
+          
+          if (email.startsWith("admin")) {
+            roleId = 1;
             roleName = "admin";
             dashboardPath = "/dashboard/admin";
           } else if (email.startsWith("staff")) {
-            roleIdd = 3;
+            roleId = 3;
             roleName = "staff";
             dashboardPath = "/dashboard/staff";
           } else if (email.startsWith("shipper")) {
-            roleIdd = 4;
+            roleId = 4;
             roleName = "shipper";
             dashboardPath = "/dashboard/shipper";
           } else {
             // Default to staff for any other email
-            roleIdd = 3;
+            roleId = 3;
             roleName = "staff";
             dashboardPath = "/dashboard/staff";
           }
-
-          // Save role name for the dashboard layout to use
-          localStorage.setItem("userRole", "staff");
-
-          toast.success("Login success", {
+          
+          // Save role ID and name for the dashboard layout to use
+          localStorage.setItem("roleId", roleId.toString());
+          localStorage.setItem("userRole", roleName);
+          
+          toast.success(`Login successful as ${roleName}`, {
             autoClose: 1500,
             onClose: () => nav(dashboardPath),
           });
         } else {
-          toast.error("Login failed");
+          toast.error("Login failed - Invalid response");
           setLoading(false);
         }
       })
       .catch((err) => {
-        console.log(err);
-        toast.error("Login failed");
+        console.error("Login error:", err);
+        
+        // Handle different types of errors
+        if (err.response) {
+          // Server returned an error response
+          toast.error(`Login failed: ${err.response.status} ${err.response.statusText}`);
+        } else if (err.request) {
+          // Request was made but no response received
+          toast.error("No response from server. Please check your connection.");
+        } else {
+          // Error in setting up the request
+          toast.error("Login failed - Request error");
+        }
+        
         setLoading(false);
       });
   };

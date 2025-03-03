@@ -1,5 +1,5 @@
 import * as React from "react";
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import type {} from "@mui/x-date-pickers/themeAugmentation";
 import type {} from "@mui/x-charts/themeAugmentation";
 import type {} from "@mui/x-data-grid-pro/themeAugmentation";
@@ -8,12 +8,10 @@ import { alpha } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
 import Box from "@mui/material/Box";
 import Stack from "@mui/material/Stack";
-import CircularProgress from "@mui/material/CircularProgress";
-import AppNavbar from "../components/AppNavbar";
 import Header from "../components/Header";
 import SideMenu from "../components/SideMenu";
 import AppTheme from "../../shared-theme/AppTheme";
-import { Outlet, useNavigate } from "react-router-dom";
+import { Outlet } from "react-router-dom";
 import {
   chartsCustomizations,
   dataGridCustomizations,
@@ -34,44 +32,12 @@ const xThemeComponents = {
   ...treeViewCustomizations,
 };
 
-export default function DashboardLayout(props: { disableCustomTheme?: boolean }) {
-  const [userRole, setUserRole] = useState<UserRole | null>(null);
-  const [loading, setLoading] = useState(true);
-  const navigate = useNavigate();
-  
-  useEffect(() => {
-    // Function to check authentication and get user role
-    const checkAuthAndRole = () => {
-      const token = localStorage.getItem("token");
-      
-      // If no token, redirect to login
-      if (!token) {
-        navigate("/dashboard/login");
-        return;
-      }
-      
-      // In a real app, you would decode the token or make an API request
-      // to get the user's role. For now, we'll simulate this:
-      
-      // For demo purposes - replace this with actual role determination logic
-      try {
-        // Simulate API call to get user role from token
-        setTimeout(() => {
-          // This should be replaced with actual role determination
-          // Here we're just picking up role from localStorage for demo
-          const role = localStorage.getItem("userRole") as UserRole || "staff";
-          setUserRole(role);
-          setLoading(false);
-        }, 500);
-      } catch (error) {
-        console.error("Error getting user role:", error);
-        navigate("/dashboard/login");
-      }
-    };
-    
-    checkAuthAndRole();
-  }, [navigate]);
-  
+export default function DashboardLayout(props: {
+  disableCustomTheme?: boolean;
+}) {
+  // Lấy userRole trực tiếp từ localStorage, không cần loading state
+  const userRole = (localStorage.getItem("userRole") as UserRole) || "staff";
+
   // Function to render the appropriate menu content based on role
   const renderMenuContent = () => {
     switch (userRole) {
@@ -82,31 +48,15 @@ export default function DashboardLayout(props: { disableCustomTheme?: boolean })
       case "shipper":
         return <ShipperMenuContent />;
       default:
-        return null;
+        return <StaffMenuContent />; // Fallback to staff
     }
   };
-  
-  // Show loading spinner while checking auth
-  if (loading) {
-    return (
-      <Box sx={{ 
-        display: 'flex', 
-        justifyContent: 'center', 
-        alignItems: 'center',
-        height: '100vh'
-      }}>
-        <CircularProgress />
-      </Box>
-    );
-  }
 
   return (
     <AppTheme {...props} themeComponents={xThemeComponents}>
       <CssBaseline enableColorScheme />
       <Box sx={{ display: "flex" }}>
-        <SideMenu>
-          {renderMenuContent()}
-        </SideMenu>
+        <SideMenu>{renderMenuContent()}</SideMenu>
         <Box
           component="main"
           sx={(theme) => ({
