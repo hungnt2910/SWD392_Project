@@ -6,41 +6,31 @@ import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
 import Stack from '@mui/material/Stack';
-import HomeRoundedIcon from '@mui/icons-material/HomeRounded';
+import DashboardIcon from '@mui/icons-material/Dashboard';
+import PeopleIcon from '@mui/icons-material/People';
+import SettingsIcon from '@mui/icons-material/Settings';
+import SecurityIcon from '@mui/icons-material/Security';
 import SettingsRoundedIcon from '@mui/icons-material/SettingsRounded';
 import InfoRoundedIcon from '@mui/icons-material/InfoRounded';
 import HelpRoundedIcon from '@mui/icons-material/HelpRounded';
-import GroupIcon from '@mui/icons-material/Group';
-import InventoryIcon from '@mui/icons-material/Inventory';
-import QuizIcon from '@mui/icons-material/Quiz';
-import FeedbackIcon from '@mui/icons-material/Feedback';
-import ArticleIcon from '@mui/icons-material/Article';
-import RouteIcon from '@mui/icons-material/Route';
-import LocalOfferIcon from '@mui/icons-material/LocalOffer';
-import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import ListIcon from '@mui/icons-material/List';
 import SwapHorizIcon from '@mui/icons-material/SwapHoriz';
-import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import ExpandLess from '@mui/icons-material/ExpandLess';
 import ExpandMore from '@mui/icons-material/ExpandMore';
 import Collapse from '@mui/material/Collapse';
+import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
+
 import { NavLink, useLocation } from 'react-router-dom';
 
-const mainMenuItems = [
-  { text: "Manage Members", path: "/dashboard/staff/members", icon: <GroupIcon /> },
-  { text: "Manage Goods", path: "/dashboard/staff/goods", icon: <InventoryIcon /> },
-  { text: "Manage Skintype MCQs", path: "/dashboard/staff/skintype", icon: <QuizIcon /> },
-  { text: "Manage Feedbacks", path: "/dashboard/staff/feedbacks", icon: <FeedbackIcon /> },
-  { text: "Manage Blogs", path: "/dashboard/staff/blogs", icon: <ArticleIcon /> },
-  { text: "Customize Skin Route", path: "/dashboard/staff/skin-route", icon: <RouteIcon /> },
-  { text: "Create Voucher", path: "/dashboard/staff/voucher", icon: <LocalOfferIcon /> },
+const adminMenuItems = [
+  { text: "Dashboard", path: "/dashboard/admin", icon: <DashboardIcon /> },
+  { text: "Manage User", path: "/dashboard/admin/staff", icon: <PeopleIcon /> },
+];
+const voucherSubMenuItems = [
+  { text: "All Vouchers", path: "/dashboard/admin/vouchers/all", icon: <ListIcon /> },
+  { text: "Pending approved", path: "/dashboard/admin/vouchers/approve", icon: <SwapHorizIcon /> },
 ];
 
-const orderSubMenuItems = [
-  { text: "All Orders", path: "/dashboard/staff/orders/all", icon: <ListIcon /> },
-  { text: "Pending Refund", path: "/dashboard/staff/orders/refund", icon: <SwapHorizIcon /> },
-  { text: "Pending Confirm", path: "/dashboard/staff/orders/confirm", icon: <CheckCircleOutlineIcon /> },
-];
 
 const secondaryListItems = [
   { text: 'Settings', icon: <SettingsRoundedIcon /> },
@@ -48,53 +38,45 @@ const secondaryListItems = [
   { text: 'Feedback', icon: <HelpRoundedIcon /> },
 ];
 
-export default function StaffMenuContent() {
-  const [ordersOpen, setOrdersOpen] = useState(false);
+export default function AdminMenuContent() {
+  const [vouchersOpen, setVouchersOpen] = useState(false);
   const location = useLocation();
-  
-  // Check if current path is under orders to auto-expand the submenu
+
   useEffect(() => {
-    if (location.pathname.includes('/dashboard/staff/orders')) {
-      setOrdersOpen(true);
+    if (location.pathname.includes('/dashboard/admin/vouchers')) {
+      setVouchersOpen(true);
     }
   }, [location]);
 
-  const handleOrdersClick = () => {
-    setOrdersOpen(!ordersOpen);
+  const handleVouchersClick = () => {
+    setVouchersOpen(!vouchersOpen);
   };
+
+
 
   return (
     <Stack sx={{ flexGrow: 1, p: 1, justifyContent: 'space-between' }}>
       <List dense>
-        {mainMenuItems.map((item, index) => (
+        {adminMenuItems.map((item, index) => (
           <ListItem key={index} disablePadding sx={{ display: 'block' }}>
-            <ListItemButton 
-              component={NavLink} 
-              to={item.path}
-              sx={(theme) => ({
-                '&.active': {
-                  backgroundColor: theme.palette.action.selected,
-                }
-              })}
-            >
+            <ListItemButton component={NavLink} to={item.path}>
               <ListItemIcon>{item.icon}</ListItemIcon>
               <ListItemText primary={item.text} />
             </ListItemButton>
           </ListItem>
         ))}
-        
-        {/* Orders dropdown menu */}
-        <ListItem disablePadding sx={{ display: 'block' }}>
-          <ListItemButton onClick={handleOrdersClick}>
+
+<ListItem disablePadding sx={{ display: 'block' }}>
+          <ListItemButton onClick={handleVouchersClick}>
             <ListItemIcon>
               <ShoppingCartIcon />
             </ListItemIcon>
-            <ListItemText primary="Manage Orders" />
-            {ordersOpen ? <ExpandLess /> : <ExpandMore />}
+            <ListItemText primary="Manage Vouchers" />
+            {vouchersOpen ? <ExpandLess /> : <ExpandMore />}
           </ListItemButton>
-          <Collapse in={ordersOpen} timeout="auto" unmountOnExit>
+          <Collapse in={vouchersOpen} timeout="auto" unmountOnExit>
             <List component="div" disablePadding>
-              {orderSubMenuItems.map((item, index) => (
+              {voucherSubMenuItems.map((item, index) => (
                 <ListItemButton 
                   key={index}
                   component={NavLink} 
@@ -114,6 +96,7 @@ export default function StaffMenuContent() {
           </Collapse>
         </ListItem>
       </List>
+
       <List dense>
         {secondaryListItems.map((item, index) => (
           <ListItem key={index} disablePadding sx={{ display: 'block' }}>

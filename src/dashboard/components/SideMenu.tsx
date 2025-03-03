@@ -1,69 +1,57 @@
-import * as React from 'react';
-import { styled } from '@mui/material/styles';
-//import Avatar from '@mui/material/Avatar';
-import MuiDrawer, { drawerClasses } from '@mui/material/Drawer';
-import Box from '@mui/material/Box';
-//import Divider from '@mui/material/Divider';
-import Stack from '@mui/material/Stack';
-//import Typography from '@mui/material/Typography';
-//import SelectContent from './SelectContent';
-import MenuContent from './MenuContent';
-import StaffMenuContent from '../layouts/StaffMenuContent';
-//import OptionsMenu from './OptionsMenu';
+import * as React from "react";
+import Box from "@mui/material/Box";
+import Drawer from "@mui/material/Drawer";
+import Toolbar from "@mui/material/Toolbar";
+import Divider from "@mui/material/Divider";
+import Typography from "@mui/material/Typography";
+import { useTheme } from "@mui/material/styles";
+import MenuContent from "./MenuContent";
+import StaffMenuContent from "../layouts/StaffMenuContent";
 
-const drawerWidth = 240;
+interface SideMenuProps {
+  children?: React.ReactNode;
+}
 
+export default function SideMenu({ children }: SideMenuProps) {
+  const theme = useTheme();
+  const drawerWidth = 240;
 
-const Drawer = styled(MuiDrawer)({
-  width: drawerWidth,
-  flexShrink: 0,
-  boxSizing: 'border-box',
-  mt: 10,
-  [`& .${drawerClasses.paper}`]: {
-    width: drawerWidth,
-    boxSizing: 'border-box',
-  },
-});
-
-export default function SideMenu() {
   return (
     <Drawer
       variant="permanent"
       sx={{
-        display: { xs: 'none', md: 'block' },
-        [`& .${drawerClasses.paper}`]: {
-          backgroundColor: 'background.paper',
+        width: drawerWidth,
+        flexShrink: 0,
+        display: { xs: "none", md: "block" },
+        "& .MuiDrawer-paper": {
+          width: drawerWidth,
+          boxSizing: "border-box",
         },
       }}
     >
-
-      <Box sx={{display: 'flex' ,p: 1.5, borderBottom: '1px solid', borderColor: 'divider' }}>
-        <p>Menu</p>
-      </Box>
-
-
-      {/* <Box
+      <Toolbar
         sx={{
-          ,
-          mt: 'calc(var(--template-frame-height, 0px) + 4px)',
-          p: 1.5,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          py: 2,
         }}
       >
-        <SelectContent />
-      </Box>
-      <Divider /> */}
+        <Typography variant="h6" component="div" fontWeight="bold">
+          Dashboard
+        </Typography>
+      </Toolbar>
+      <Divider />
       <Box
         sx={{
-          overflow: 'auto',
-          height: '100%',
-          display: 'flex',
-          flexDirection: 'column',
+          overflow: "auto",
+          height: "100%",
+          display: "flex",
+          flexDirection: "column",
         }}
-      >
-        <StaffMenuContent />
+      >      {children}
 
       </Box>
-
     </Drawer>
   );
 }

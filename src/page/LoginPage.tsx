@@ -1,10 +1,8 @@
 import { Box, Button, Container, IconButton, InputAdornment, TextField, Typography } from "@mui/material"
-import { ChangeEvent, useState } from "react"
 import axios from 'axios';
 import { useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { LoginType } from "../utils/types";
 import { portserver } from "../utils/portserver";
 import background from '../assets/cosmetic-background.jpg';
 import React from "react";
@@ -12,20 +10,7 @@ import { VisibilityOff, Visibility } from "@mui/icons-material";
 
 
 function LoginPage() {
-    const [login, setLogin] = useState<LoginType>({
-        email: '',
-        password: ''
-    })
-    const [mess, setMesss] = useState<string>('')
     const nav = useNavigate()
-
-    const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-        const { name, value } = e.target
-        setLogin({
-            ...login,
-            [name]: value
-        })
-    }
 
     const [password, setPassword] = React.useState("");
     const [email, setEmail] = React.useState("");
@@ -53,12 +38,12 @@ function LoginPage() {
 
     const handleLogin = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        axios.post(`${portserver}auth/signin`, login)
+        axios.post(`${portserver}/auth/signin`, { email, password })
             .then(res => {
                 console.log(res.data)
-                if (res.data.accessToken !== null) {
+                if (res.data.accessToken !== undefined) {
                     toast.success("Login success", {
-                        autoClose: 1500,
+                        autoClose: 1000,
                         onClose: () => nav('/home')
                     })
                     localStorage.setItem("token", res.data.accessToken)
@@ -75,14 +60,14 @@ function LoginPage() {
 
     return (
         <Container
-            maxWidth={false} // Full width
-            disableGutters // Remove padding
+            maxWidth={false}
+            disableGutters
             sx={{
                 display: 'flex',
                 justifyContent: 'center',
                 alignItems: 'center',
-                width: '100vw', // Full viewport width
-                height: '100vh', // Full viewport height
+                width: '100vw',
+                height: '100vh',
                 backgroundImage: `url(${background})`,
                 backgroundSize: 'cover',
                 backgroundPosition: 'center',
@@ -90,8 +75,6 @@ function LoginPage() {
             }}
         >
             <ToastContainer />
-
-            {/* Centered Login Form */}
             <Box
                 sx={{
                     display: 'flex',
@@ -99,7 +82,7 @@ function LoginPage() {
                     justifyContent: 'center',
                     alignItems: 'center',
                     width: '100%',
-                    maxWidth: '400px', // Adjust width for better centering
+                    maxWidth: '400px',
                     padding: '2rem',
                 }}
             >
@@ -115,7 +98,6 @@ function LoginPage() {
                         placeholder="abc@domain.com"
                         fullWidth
                         value={email}
-                        //onChange={handleChange}
                         sx={{ marginBottom: "2rem" }}
                         variant="standard"
                         required

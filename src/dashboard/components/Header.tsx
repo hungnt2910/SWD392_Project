@@ -8,7 +8,7 @@ import ColorModeIconDropdown from '../../shared-theme/ColorModeIconDropdown';
 import Avatar from '@mui/material/Avatar';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
-import OptionsMenu from './OptionsMenu';
+import HeaderOptionsMenu from './OptionsMenu';
 
 import Search from './Search';
 
@@ -29,11 +29,11 @@ export default function Header() {
       
       <NavbarBreadcrumbs />
       <Stack direction="row" sx={{ gap: 1 }}>
-        <Search />
+        {/* <Search /> */}
         <CustomDatePicker />
-        <MenuButton showBadge aria-label="Open notifications">
+        {/* <MenuButton showBadge aria-label="Open notifications">
           <NotificationsRoundedIcon />
-        </MenuButton>
+        </MenuButton> */}
         <Avatar
           sizes="small"
           alt="Riley Carter"
@@ -48,7 +48,7 @@ export default function Header() {
             riley@email.com
           </Typography>
         </Box>
-        <OptionsMenu />
+        <HeaderOptionsMenu />
         <ColorModeIconDropdown />
       </Stack>
     </Stack>

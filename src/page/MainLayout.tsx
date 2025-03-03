@@ -4,9 +4,11 @@ import Header from "../components/Header"
 function MainLayout({ children }: { children: React.ReactNode }) {
     return (
         <>
-            <Header />
-            <main style={{ marginTop: '6em', marginBottom: '2em' }}>{children}</main>
-            <Footer />
+            <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+                <Header />
+                <main style={{ marginTop: '6em', marginBottom: '2em', flexGrow: 1 }}>{children}</main>
+                <Footer />
+            </div>
         </>
     )
 }
