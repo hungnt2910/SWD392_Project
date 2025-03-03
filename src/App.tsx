@@ -5,6 +5,7 @@ import ShowAllProduct from "./page/ShowAllProduct"
 import Dashboard from "./dashboard/Dashboard";
 import StaffLayout from "./dashboard/layouts/StaffLayout";
 import ManageMembers from "./dashboard/pages/staff/ManageMembers";
+import OrderList from "./dashboard/pages/staff/OrderList";
 
 const LoginPage = lazy(() => import("./page/LoginPage"))
 const RegisterPage = lazy(() => import("./page/RegisterPage"))
@@ -22,7 +23,7 @@ function App() {
   }
 
   return (
-    
+
     <Suspense fallback={<div>Loading...</div>}>
 
       <Routes>
@@ -33,9 +34,10 @@ function App() {
         <Route path="/allproduct" element={<MainLayout><ShowAllProduct /></MainLayout>} />
 
         <Route path="/dashboard/staff" element={<StaffLayout />}>
-          <Route path="members" element={<ManageMembers/>} />
+          <Route path="members" element={<ManageMembers />} />
+          <Route path="orders/all" element={<OrderList />} />
         </Route>
-        
+
         <Route path="/cart" element={
           <ProtectRoute>
             <MainLayout><CartPage /></MainLayout>

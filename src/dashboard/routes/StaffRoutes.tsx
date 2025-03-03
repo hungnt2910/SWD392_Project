@@ -1,6 +1,8 @@
 import { Routes, Route } from "react-router-dom";
 import StaffLayout from "../layouts/StaffLayout";
 import ManageMembers from "../pages/staff/ManageMembers";
+import OrderList from "../pages/staff/OrderList";
+
 // import ManageMembers from "../pages/staff/ManageMembers";
 // import ManageGoods from "../pages/staff/ManageGoods";
 // import ManageSkintype from "../pages/staff/ManageSkintype";
@@ -16,7 +18,8 @@ export default function StaffRoutes() {
   return (
     <Routes>
       <Route path="/dashboard/staff" element={<StaffLayout />}>
-        <Route path="members" element={<ManageMembers/>} />
+        <Route path="members" element={<ManageMembers />} />
+        <Route path="orders/all" element={<OrderList />} />
       </Route>
     </Routes>
   );
