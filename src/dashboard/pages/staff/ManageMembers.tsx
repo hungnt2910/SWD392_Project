@@ -6,14 +6,13 @@ import Chip from '@mui/material/Chip';
 import IconButton from '@mui/material/IconButton';
 import BlockIcon from '@mui/icons-material/Block';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import EditIcon from '@mui/icons-material/Edit'; // Add this import
+import EditIcon from '@mui/icons-material/Edit'; 
 import Stack from '@mui/material/Stack';
 import Tooltip from '@mui/material/Tooltip';
 import axios from 'axios';
 import CircularProgress from '@mui/material/CircularProgress';
 import Alert from '@mui/material/Alert';
 
-// Define the User interface
 interface User {
   id: number;
   name: string;
@@ -25,24 +24,20 @@ interface User {
 }
 
 export default function ManageMembers() {
-  // State to manage users
   const [users, setUsers] = React.useState<User[]>([]);
   const [loading, setLoading] = React.useState<boolean>(true);
   const [error, setError] = React.useState<string | null>(null);
 
-  // Fetch users from API
   useEffect(() => {
     const fetchUsers = async () => {
       try {
         setLoading(true);
-        // Replace with your actual API endpoint
         const response = await axios.get('https://your-api-endpoint.com/users');
         setUsers(response.data);
         setError(null);
       } catch (err) {
         console.error('Error fetching users:', err);
         setError('Failed to load users. Please try again later.');
-        // Use mock data for development if API fails
         setUsers([
             { id: 1, name: 'John Doe', password: 'pass123', phone: '123-456-7890', address: '123 Main St', status: 'active', loyaltyPoints: 250 },
             { id: 2, name: 'Jane Smith', password: 'pass456', phone: '987-654-3210', address: '456 Oak Ave', status: 'active', loyaltyPoints: 500 },
@@ -60,23 +55,19 @@ export default function ManageMembers() {
     };
 
     fetchUsers();
-  }, []); // Empty dependency array means this effect runs once on mount
+  }, []); 
 
-  // Function to toggle user status
   const toggleUserStatus = async (id: number) => {
     try {
-      // Get the current user to determine the new status
       const user = users.find(user => user.id === id);
       if (!user) return;
       
       const newStatus = user.status === 'active' ? 'inactive' : 'active';
       
-      // Call API to update the user status
       await axios.put(`https://your-api-endpoint.com/users/${id}`, {
         status: newStatus
       });
       
-      // Update local state after successful API call
       setUsers(users.map(user => {
         if (user.id === id) {
           return {
@@ -92,14 +83,10 @@ export default function ManageMembers() {
     }
   };
   
-  // Function to handle edit user
   const handleEditUser = (id: number) => {
-    // You can implement edit functionality here
-    // For example, open a dialog with user details for editing
     console.log(`Edit user with ID: ${id}`);
   };
 
-  // Define the columns for the DataGrid
   const columns: GridColDef<User>[] = [
     { 
       field: 'id', 
@@ -163,7 +150,7 @@ export default function ManageMembers() {
     {
       field: 'actions',
       headerName: 'Actions',
-      flex: 1, // Increased flex value to accommodate more buttons
+      flex: 1, 
       minWidth: 120,
       sortable: false,
       filterable: false,
@@ -207,7 +194,6 @@ export default function ManageMembers() {
     },
   ];
 
-  // If loading, show a loading indicator
   if (loading) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '400px' }}>
@@ -217,7 +203,7 @@ export default function ManageMembers() {
   }
 
   return (
-    <Box sx={{ height: 600, width: '100%', p: 2 }}>
+    <Box sx={{width: '100%', p: 2 }}>
       <h2>Customer Management</h2>
       
       {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}

@@ -14,7 +14,6 @@ import axios from "axios";
 import CircularProgress from "@mui/material/CircularProgress";
 import Alert from "@mui/material/Alert";
 import Typography from "@mui/material/Typography";
-import { useTheme } from "@mui/material/styles";
 import Button from "@mui/material/Button";
 import AddIcon from "@mui/icons-material/Add";
 import InputLabel from "@mui/material/InputLabel";
@@ -28,6 +27,7 @@ import InputAdornment from "@mui/material/InputAdornment";
 import ClearIcon from "@mui/icons-material/Clear";
 import IconButtonBase from "@mui/material/IconButton";
 import ProductDetailDialog from "./ProductDetailDialog";
+import AddProductDialog from "./AddProductDialog";
 
 
 interface Product {
@@ -50,7 +50,7 @@ interface Brand {
 }
 
 export default function ManageGoods() {
-  const theme = useTheme();
+  const [addDialogOpen, setAddDialogOpen] = useState<boolean>(false);
 
   const [selectedBrand, setSelectedBrand] = useState<string>("");
   const [brands, setBrands] = useState<Brand[]>([]);
@@ -65,11 +65,16 @@ export default function ManageGoods() {
   const handleBrandChange = (event: SelectChangeEvent) => {
     setSelectedBrand(event.target.value);
   };
-
+  const handleAddProduct = () => {
+    setAddDialogOpen(true);
+  };
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(event.target.value);
   };
-
+  const handleCloseAddDialog = () => {
+    setAddDialogOpen(false);
+  };
+  
   const handleViewProduct = (id: number) => {
     console.log("View product clicked:", id);
     const product = products.find((p) => p.productId === id);
@@ -201,9 +206,6 @@ export default function ManageGoods() {
     console.log(`Edit product with ID: ${id}`);
   };
 
-  const handleAddProduct = () => {
-    console.log("Add new product");
-  };
 
   const formatPrice = (price: any) => {
     if (!price && price !== 0) return "$0.00";
@@ -389,7 +391,6 @@ export default function ManageGoods() {
 
   return (
     <Box sx={{ width: "100%", p: 2 }}>
-      {/* Header */}
       <Box
         sx={{
           display: "flex",
@@ -526,6 +527,11 @@ export default function ManageGoods() {
         open={detailDialogOpen}
         onClose={handleCloseDetailDialog}
         product={selectedProduct}
+      />
+      <AddProductDialog 
+        open={addDialogOpen}
+        onClose={handleCloseAddDialog}
+        onProductAdded={fetchProducts}
       />
     </Box>
   );

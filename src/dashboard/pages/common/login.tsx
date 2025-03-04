@@ -1,5 +1,5 @@
 import * as React from "react";
-import { ChangeEvent, useState } from "react";
+import { useState } from "react";
 import {
   Box,
   Button,
@@ -17,29 +17,16 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { portserver } from "../../../utils/portserver";
 
-interface LoginType {
-  email: string;
-  password: string;
-}
+
 
 function DashboardLogin() {
-  const [login, setLogin] = useState<LoginType>({
-    email: "",
-    password: "",
-  });
+
   const [password, setPassword] = useState("");
   const [email, setEmail] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const nav = useNavigate();
 
-  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setLogin({
-      ...login,
-      [name]: value,
-    });
-  };
 
   const validatePassword = (inputPassword: string): boolean => {
     const regex = /^(?!\d)[A-Za-z\d@$!%*?&#]{8,}$/;
@@ -63,7 +50,6 @@ function DashboardLogin() {
     e.preventDefault();
     setLoading(true);
   
-    // Create login data object
     const loginData = {
       email,
       password,
@@ -74,14 +60,11 @@ function DashboardLogin() {
       .then((res) => {
         console.log("API response:", res.data);
         
-        // Check if accessToken exists in response
         if (res.data.accessToken !== undefined && res.data.accessToken !== null) {
           const accessToken = res.data.accessToken;
           
-          // Store token in localStorage
           localStorage.setItem("token", accessToken);
           
-          // Determine role based on email prefix for demo purposes
           let roleId = 0;
           let roleName;
           let dashboardPath;
@@ -99,13 +82,11 @@ function DashboardLogin() {
             roleName = "shipper";
             dashboardPath = "/dashboard/shipper";
           } else {
-            // Default to staff for any other email
             roleId = 3;
             roleName = "staff";
             dashboardPath = "/dashboard/staff";
           }
           
-          // Save role ID and name for the dashboard layout to use
           localStorage.setItem("roleId", roleId.toString());
           localStorage.setItem("userRole", roleName);
           
@@ -121,15 +102,11 @@ function DashboardLogin() {
       .catch((err) => {
         console.error("Login error:", err);
         
-        // Handle different types of errors
         if (err.response) {
-          // Server returned an error response
           toast.error(`Login failed: ${err.response.status} ${err.response.statusText}`);
         } else if (err.request) {
-          // Request was made but no response received
           toast.error("No response from server. Please check your connection.");
         } else {
-          // Error in setting up the request
           toast.error("Login failed - Request error");
         }
         

@@ -5,6 +5,7 @@ import NotFoundPage from "../pages/common/NotFoundPage";
 import ManageGoods from "../pages/staff/ManageGoods";
 import ManageMembers from "../pages/staff/ManageMembers";
 import OrderList from "../pages/staff/OrderList";
+import OrderConfirm from "../pages/staff/OrderConfirm";
 import { useEffect, useState } from "react";
 
 // Protected Route Component
@@ -27,12 +28,12 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
 
 export default function DashboardRoutes() {
   // Kiểm tra nếu đã đăng nhập
-  const isLoggedIn = Boolean(localStorage.getItem("userRole"));
+  const isLoggedIn = Boolean(localStorage.getItem("token"));
 
   return (
     <Routes>
-      {/* Login Route - Accessible to everyone */}
-      <Route
+      {/* Login Route */}
+      <Route 
         path="/logindashboard"
         element={
           isLoggedIn ? (
@@ -59,6 +60,7 @@ export default function DashboardRoutes() {
         <Route path="members" element={<ManageMembers />} />
         <Route path="goods" element={<ManageGoods />} />
         <Route path="orders/all" element={<OrderList />} />
+        <Route path="orders/confirm" element={<OrderConfirm />} />
       </Route>
 
       {/* Admin Routes */}
@@ -104,15 +106,12 @@ export default function DashboardRoutes() {
         }
       />
 
-      {/* Not Found Page - For invalid dashboard URLs */}
       <Route path="/notfound" element={<NotFoundPage />} />
 
-      {/* Catch all unauthorized access or invalid routes */}
       <Route
         path="*"
         element={
           isLoggedIn ? (
-            // Đã đăng nhập, nhưng truy cập URL không tồn tại -> NotFound
             <Navigate to="/dashboard/notfound" replace />
           ) : (
             <Navigate to="/dashboard/logindashboard" replace />

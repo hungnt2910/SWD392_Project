@@ -10,7 +10,6 @@ import Slide from "@mui/material/Slide";
 import { TransitionProps } from "@mui/material/transitions";
 import { Box, Grid, Typography, Chip, Divider } from "@mui/material";
 
-// Define the Product interface (same as in ManageGoods)
 interface Product {
   productId: number;
   productName: string;
@@ -21,7 +20,6 @@ interface Product {
   stock: number;
 }
 
-// Viết lại Transition - đảm bảo sử dụng forwardRef đúng cách
 const Transition = forwardRef<unknown, TransitionProps>(function Transition(
   props,
   ref
@@ -53,7 +51,6 @@ const ProductDetailDialog: React.FC<ProductDetailDialogProps> = ({
     }
   };
 
-  // Format date - using native JavaScript Date formatting
   const formatDate = (dateString: string) => {
     if (!dateString) return "N/A";
 
@@ -65,7 +62,6 @@ const ProductDetailDialog: React.FC<ProductDetailDialogProps> = ({
     }
   };
 
-  // Sử dụng React.useMemo để đảm bảo Dialog không bị re-render không cần thiết
   const dialogContent = React.useMemo(
     () => (
       <>
