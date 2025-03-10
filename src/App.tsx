@@ -8,6 +8,7 @@ import ContactPage from "./page/ContactPage";
 import DashboardRoutes from "./dashboard/routes/DashboardRoutes";
 import QuizPage from "./page/QuizPage"
 import SearchPage from "./page/SearchPage"
+import CartLayout from "./page/Cart/CartLayout"
 
 const LoginPage = lazy(() => import("./page/LoginPage"))
 const RegisterPage = lazy(() => import("./page/RegisterPage"))
@@ -44,7 +45,7 @@ function App() {
 
         <Route path="/cart" element={
           <ProtectRoute>
-            <MainLayout><CartPage /></MainLayout>
+            <MainLayout><CartLayout><CartPage /></CartLayout></MainLayout>
           </ProtectRoute>
         } />
         <Route path="/dashboard/*" element={<DashboardRoutes />} />

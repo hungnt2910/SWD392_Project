@@ -58,7 +58,7 @@ function BestSell() {
         nextArrow: <NextArrow />
     };
 
-    const { addProduct } = useCart()
+    const { addProduct } = useCart();
 
     return (
         <Container sx={{ position: "relative", maxWidth: "lg" }}>
@@ -69,12 +69,27 @@ function BestSell() {
                 {[1, 2, 3, 4, 5, 6, 7, 8].map((item) => (
                     <Grid item xs={12} sm={6} md={3} sx={{ px: 1 }} key={item}>
                         <Card sx={{
-                            display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center", height: "25em", transition: "0.3s", border: "1px solid rgb(194, 192, 192)",
+                            display: "flex",
+                            flexDirection: "column",
+                            alignItems: "center",
+                            textAlign: "center",
+                            height: "25em",
+                            transition: "0.3s",
+                            borderRadius: "16px",
+                            overflow: "hidden",
+                            border: "1px solid rgb(194, 192, 192)",
                             '&:hover': {
-                                border: "1px solid rgb(25, 167, 210)"
+                                border: "1px solid rgb(25, 167, 210)",
+                                boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.1)"
                             }
                         }}>
-                            <CardMedia component="img" height="200" image="/new-arrival.jpg" alt={"anh"} sx={{ width: "100%", cursor: 'pointer' }} />
+                            <CardMedia
+                                component="img"
+                                height="200"
+                                image="/new-arrival.jpg"
+                                alt={"anh"}
+                                sx={{ width: "100%", cursor: "pointer", borderRadius: "16px 16px 0 0" }}
+                            />
                             <CardContent sx={{ flexGrow: 1, width: "100%" }}>
                                 <Box sx={{ display: "flex", flexDirection: "column", justifyContent: "space-between", height: "100%", marginTop: '0.5rem' }}>
                                     <Box sx={{ cursor: "pointer", "&:hover": { textDecoration: "underline" } }}>
@@ -84,13 +99,14 @@ function BestSell() {
                                         <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>{item} VND</Typography>
                                     </Box>
                                     <Box>
-                                        <Button variant="contained" fullWidth
-                                        // onClick={() => addProduct({
-                                        //     productId: item.productId,
-                                        //     productName: item.productName,
-                                        //     price: item.price,
-                                        //     quantity: 1
-                                        // })}
+                                        <Button
+                                            variant="contained"
+                                            fullWidth
+                                            sx={{
+                                                borderRadius: "8px",
+                                                textTransform: "none",
+                                                fontSize: "1rem",
+                                            }}
                                         >
                                             Buy Now
                                         </Button>
@@ -104,5 +120,6 @@ function BestSell() {
         </Container>
     )
 }
+
 
 export default BestSell
