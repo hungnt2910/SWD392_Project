@@ -116,7 +116,6 @@ function RegisterPage() {
                         fullWidth
                         value={email}
                         sx={{ marginBottom: "1rem" }}
-                        variant="standard"
                         required
                         onChange={(e) => setEmail(e.target.value)}
                         error={!!email && !validateEmail(email)}
@@ -125,6 +124,7 @@ function RegisterPage() {
                                 ? "Địa chỉ email không hợp lệ"
                                 : ""
                         }
+                        variant="standard"
                     />
                     <TextField
                         label="User Name"
