@@ -10,6 +10,14 @@ import QuizPage from "./page/QuizPage"
 import SearchPage from "./page/SearchPage"
 import CartLayout from "./page/Cart/CartLayout"
 
+//staff:
+import ManageGoods from "./dashboard/pages/staff/ManageGoods";
+import ManageMembers from "./dashboard/pages/staff/ManageMembers";
+import OrderList from "./dashboard/pages/staff/OrderList";
+import OrderConfirm from "./dashboard/pages/staff/OrderConfirm";
+//admin:
+
+
 const LoginPage = lazy(() => import("./page/LoginPage"))
 const RegisterPage = lazy(() => import("./page/RegisterPage"))
 const HomePage = lazy(() => import("./page/Home/HomePage"))
