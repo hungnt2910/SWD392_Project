@@ -21,7 +21,7 @@ import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import { NavLink, useLocation } from 'react-router-dom';
 
 const adminMenuItems = [
-  { text: "Dashboard", path: "/dashboard/admin", icon: <DashboardIcon /> },
+  { text: "Dashboard", path: "/admin/dashboard", icon: <DashboardIcon /> },
   { text: "Manage User", path: "/dashboard/admin/staff", icon: <PeopleIcon /> },
 ];
 const voucherSubMenuItems = [
@@ -64,7 +64,7 @@ export default function AdminMenuContent() {
           </ListItem>
         ))}
 
-<ListItem disablePadding sx={{ display: 'block' }}>
+        <ListItem disablePadding sx={{ display: 'block' }}>
           <ListItemButton onClick={handleVouchersClick}>
             <ListItemIcon>
               <ShoppingCartIcon />
@@ -75,9 +75,9 @@ export default function AdminMenuContent() {
           <Collapse in={vouchersOpen} timeout="auto" unmountOnExit>
             <List component="div" disablePadding>
               {voucherSubMenuItems.map((item, index) => (
-                <ListItemButton 
+                <ListItemButton
                   key={index}
-                  component={NavLink} 
+                  component={NavLink}
                   to={item.path}
                   sx={(theme) => ({
                     pl: 4,

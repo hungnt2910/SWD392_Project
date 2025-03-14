@@ -1,16 +1,11 @@
 import * as React from 'react';
 import Stack from '@mui/material/Stack';
-import NotificationsRoundedIcon from '@mui/icons-material/NotificationsRounded';
-import CustomDatePicker from './CustomDatePicker';
 import NavbarBreadcrumbs from './NavbarBreadcrumbs';
-import MenuButton from './MenuButton';
 import ColorModeIconDropdown from '../../shared-theme/ColorModeIconDropdown';
 import Avatar from '@mui/material/Avatar';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import HeaderOptionsMenu from './OptionsMenu';
-
-import Search from './Search';
 
 export default function Header() {
   return (
@@ -26,14 +21,9 @@ export default function Header() {
       }}
       spacing={2}
     >
-      
+
       <NavbarBreadcrumbs />
       <Stack direction="row" sx={{ gap: 1 }}>
-        {/* <Search /> */}
-        <CustomDatePicker />
-        {/* <MenuButton showBadge aria-label="Open notifications">
-          <NotificationsRoundedIcon />
-        </MenuButton> */}
         <Avatar
           sizes="small"
           alt="Riley Carter"
@@ -48,7 +38,6 @@ export default function Header() {
             riley@email.com
           </Typography>
         </Box>
-        <HeaderOptionsMenu />
         <ColorModeIconDropdown />
       </Stack>
     </Stack>

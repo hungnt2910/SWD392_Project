@@ -8,6 +8,7 @@ export interface RegisterType extends LoginType {
 }
 
 export type Product = {
+    urlImage: string;
     productId: number,
     productName: string,
     description: string,
