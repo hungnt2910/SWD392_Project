@@ -29,7 +29,7 @@ const mainMenuItems = [
   { text: "Manage Members", path: "/dashboard/staff/members", icon: <GroupIcon /> },
   { text: "Manage Goods", path: "/dashboard/staff/goods", icon: <InventoryIcon /> },
   { text: "Manage Skintype MCQs", path: "/dashboard/staff/skintype", icon: <QuizIcon /> },
-  { text: "Manage Feedbacks", path: "/dashboard/staff/feedbacks", icon: <FeedbackIcon /> },
+  { text: "Manage Reviews", path: "/dashboard/staff/reviews", icon: <FeedbackIcon /> },
   { text: "Manage Blogs", path: "/dashboard/staff/blogs", icon: <ArticleIcon /> },
   { text: "Customize Skin Route", path: "/dashboard/staff/skin-route", icon: <RouteIcon /> },
   { text: "Create Voucher", path: "/dashboard/staff/voucher", icon: <LocalOfferIcon /> },

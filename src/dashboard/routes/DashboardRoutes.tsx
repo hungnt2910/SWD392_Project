@@ -6,6 +6,10 @@ import ManageGoods from "../pages/staff/ManageGoods";
 import ManageMembers from "../pages/staff/ManageMembers";
 import OrderList from "../pages/staff/OrderList";
 import OrderConfirm from "../pages/staff/OrderConfirm";
+import ManageReviews from "../pages/staff/ManageReviews";
+import ManageBlogs from "../pages/staff/ManageBlogs";
+import CreateVoucher from "../pages/staff/CreateVoucher";
+
 import { useEffect, useState } from "react";
 
 // Protected Route Component
@@ -61,6 +65,9 @@ export default function DashboardRoutes() {
         <Route path="goods" element={<ManageGoods />} />
         <Route path="orders/all" element={<OrderList />} />
         <Route path="orders/confirm" element={<OrderConfirm />} />
+        <Route path="reviews" element={<ManageReviews />} />
+        <Route path="blogs" element={<ManageBlogs />} />
+        <Route path="voucher" element={<CreateVoucher />} />
       </Route>
 
       {/* Admin Routes */}
