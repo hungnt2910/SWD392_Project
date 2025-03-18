@@ -41,7 +41,9 @@ function LoginPage() {
             nav('/staff')
         } else if (localStorage.getItem("token") && jwtDecode<{ role: string }>(localStorage.getItem("token")!)?.role === "Shipper") {
             nav('/shipper')
-        } else {
+        } else if (localStorage.getItem("token") && jwtDecode<{ role: string }>(localStorage.getItem("token")!)?.role === "Admin") {
+            nav('/admin')
+        }else{
             nav('/')
         }
     };
