@@ -5,8 +5,7 @@ import Toolbar from "@mui/material/Toolbar";
 import Divider from "@mui/material/Divider";
 import Typography from "@mui/material/Typography";
 import { useTheme } from "@mui/material/styles";
-import MenuContent from "./MenuContent";
-import StaffMenuContent from "../layouts/StaffMenuContent";
+
 
 interface SideMenuProps {
   children?: React.ReactNode;

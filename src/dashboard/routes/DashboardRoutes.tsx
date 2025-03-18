@@ -9,24 +9,20 @@ import OrderConfirm from "../pages/staff/OrderConfirm";
 import ManageReviews from "../pages/staff/ManageReviews";
 import ManageBlogs from "../pages/staff/ManageBlogs";
 import CreateVoucher from "../pages/staff/CreateVoucher";
-
+import ManageUsers from "../pages/admin/ManageUsers";
 import { useEffect, useState } from "react";
-
-// Protected Route Component
+import Dashboard from "../pages/admin/Dashboard";
 const ProtectedRoute = ({ children, allowedRoles }) => {
   const userRole = localStorage.getItem("userRole") || "";
 
   if (!userRole) {
-    // Chưa đăng nhập, chuyển hướng tới trang login
     return <Navigate to="/dashboard/logindashboard" replace />;
   }
 
   if (!allowedRoles.includes(userRole)) {
-    // Không có quyền truy cập, chuyển hướng tới trang tương ứng với role
     return <Navigate to={`/dashboard/${userRole}`} replace />;
   }
 
-  // Có quyền truy cập
   return children;
 };
 
@@ -79,8 +75,8 @@ export default function DashboardRoutes() {
           </ProtectedRoute>
         }
       >
-        <Route index element={<div>Admin Dashboard</div>} />
-        <Route path="staff" element={<div>Staff Management</div>} />
+        <Route index element={<Dashboard/>} />
+        <Route path="users" element={<ManageUsers />} />
         <Route path="vouchers/all" element={<div>All Vouchers</div>} />
         <Route path="vouchers/pending" element={<div>Pending Vouchers</div>} />
       </Route>

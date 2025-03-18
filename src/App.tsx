@@ -15,8 +15,12 @@ import ManageGoods from "./dashboard/pages/staff/ManageGoods";
 import ManageMembers from "./dashboard/pages/staff/ManageMembers";
 import OrderList from "./dashboard/pages/staff/OrderList";
 import OrderConfirm from "./dashboard/pages/staff/OrderConfirm";
+import ManageReviews from "./dashboard/pages/staff/ManageReviews";
+import ManageBlogs from "./dashboard/pages/staff/ManageBlogs";
+import CreateVoucher from "./dashboard/pages/staff/CreateVoucher";
 //admin:
-
+import Dashboard from "./dashboard/pages/admin/Dashboard";
+import ManageUsers from "./dashboard/pages/admin/ManageUsers";
 
 const LoginPage = lazy(() => import("./page/LoginPage"))
 const RegisterPage = lazy(() => import("./page/RegisterPage"))

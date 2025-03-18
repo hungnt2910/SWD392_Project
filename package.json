@@ -25,6 +25,7 @@
     "@react-spring/web": "latest",
     "axios": "^1.7.9",
     "clsx": "latest",
+    "date-fns": "^2.30.0",
     "dayjs": "latest",
     "framer-motion": "^12.4.10",
     "jwt-decode": "^4.0.0",
