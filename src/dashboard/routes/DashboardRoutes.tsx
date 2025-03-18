@@ -11,116 +11,121 @@ import ManageBlogs from "../pages/staff/ManageBlogs";
 import CreateVoucher from "../pages/staff/CreateVoucher";
 import ManageUsers from "../pages/admin/ManageUsers";
 import { useEffect, useState } from "react";
-import Dashboard from "../pages/admin/Dashboard";
-const ProtectedRoute = ({ children, allowedRoles }) => {
-  const userRole = localStorage.getItem("userRole") || "";
+//import Dashboard from "../pages/admin/Dashboard";
 
-  if (!userRole) {
-    return <Navigate to="/dashboard/logindashboard" replace />;
-  }
+// Protected Route Component
+// const ProtectedRoute = ({ children, allowedRoles }) => {
+//   const userRole = localStorage.getItem("userRole") || "";
 
-  if (!allowedRoles.includes(userRole)) {
-    return <Navigate to={`/dashboard/${userRole}`} replace />;
-  }
+//   if (!userRole) {
+//     // Chưa đăng nhập, chuyển hướng tới trang login
+//     return <Navigate to="/dashboard/logindashboard" replace />;
+//   }
 
-  return children;
-};
+//   if (!allowedRoles.includes(userRole)) {
+//     // Không có quyền truy cập, chuyển hướng tới trang tương ứng với role
+//     return <Navigate to={`/dashboard/${userRole}`} replace />;
+//   }
 
-export default function DashboardRoutes() {
-  // Kiểm tra nếu đã đăng nhập
-  const isLoggedIn = Boolean(localStorage.getItem("token"));
+//   // Có quyền truy cập
+//   return children;
+// };
 
-  return (
-    <Routes>
-      {/* Login Route */}
-      <Route 
-        path="/logindashboard"
-        element={
-          isLoggedIn ? (
-            <Navigate
-              to={`/dashboard/${localStorage.getItem("userRole")}`}
-              replace
-            />
-          ) : (
-            <DashboardLogin />
-          )
-        }
-      />
+// export default function DashboardRoutes() {
+//   // Kiểm tra nếu đã đăng nhập
+//   const isLoggedIn = Boolean(localStorage.getItem("token"));
 
-      {/* Staff Routes */}
-      <Route
-        path="/staff"
-        element={
-          <ProtectedRoute allowedRoles={["staff"]}>
-            <DashboardLayout />
-          </ProtectedRoute>
-        }
-      >
-        <Route index element={<Navigate to="members" replace />} />
-        <Route path="members" element={<ManageMembers />} />
-        <Route path="goods" element={<ManageGoods />} />
-        <Route path="orders/all" element={<OrderList />} />
-        <Route path="orders/confirm" element={<OrderConfirm />} />
-        <Route path="reviews" element={<ManageReviews />} />
-        <Route path="blogs" element={<ManageBlogs />} />
-        <Route path="voucher" element={<CreateVoucher />} />
-      </Route>
+//   return (
+//     <Routes>
+//       {/* Login Route */}
+//       <Route
+//         path="/logindashboard"
+//         element={
+//           isLoggedIn ? (
+//             <Navigate
+//               to={`/dashboard/${localStorage.getItem("userRole")}`}
+//               replace
+//             />
+//           ) : (
+//             <DashboardLogin />
+//           )
+//         }
+//       />
 
-      {/* Admin Routes */}
-      <Route
-        path="/admin"
-        element={
-          <ProtectedRoute allowedRoles={["admin"]}>
-            <DashboardLayout />
-          </ProtectedRoute>
-        }
-      >
-        <Route index element={<Dashboard/>} />
-        <Route path="users" element={<ManageUsers />} />
-        <Route path="vouchers/all" element={<div>All Vouchers</div>} />
-        <Route path="vouchers/pending" element={<div>Pending Vouchers</div>} />
-      </Route>
+//       {/* Staff Routes */}
+//       <Route
+//         path="/staff"
+//         element={
+//           // <ProtectedRoute allowedRoles={["staff"]}>
+//           <DashboardLayout />
+//           // </ProtectedRoute>
+//         }
+//       >
+//         <Route index element={<Navigate to="members" replace />} />
+//         <Route path="members" element={<ManageMembers />} />
+//         <Route path="goods" element={<ManageGoods />} />
+//         <Route path="orders/all" element={<OrderList />} />
+//         <Route path="orders/confirm" element={<OrderConfirm />} />
+//<Route path="reviews" element={<ManageReviews />} />
+//<Route path="blogs" element={<ManageBlogs />} />
+//<Route path="voucher" element={<CreateVoucher />} />
+//       </Route>
 
-      {/* Shipper Routes */}
-      <Route
-        path="/shipper"
-        element={
-          <ProtectedRoute allowedRoles={["shipper"]}>
-            <DashboardLayout />
-          </ProtectedRoute>
-        }
-      >
-        <Route index element={<div>Shipper Dashboard</div>} />
-        <Route path="pending" element={<div>Pending Deliveries</div>} />
-      </Route>
+//       {/* Admin Routes */}
+//       <Route
+//         path="/admin"
+//         element={
+//           // <ProtectedRoute allowedRoles={["admin"]}>
+//           <DashboardLayout />
+//           // </ProtectedRoute>
+//         }
+//       >
+//<Route index element={<Dashboard/>} />
+//<Route path="users" element={<ManageUsers />} />
+//         <Route path="vouchers/all" element={<div>All Vouchers</div>} />
+//         <Route path="vouchers/pending" element={<div>Pending Vouchers</div>} />
+//       </Route>
 
-      {/* Default redirection based on login status */}
-      <Route
-        path="/"
-        element={
-          isLoggedIn ? (
-            <Navigate
-              to={`/dashboard/${localStorage.getItem("userRole")}`}
-              replace
-            />
-          ) : (
-            <Navigate to="/dashboard/logindashboard" replace />
-          )
-        }
-      />
+//       {/* Shipper Routes */}
+//       <Route
+//         path="/shipper"
+//         element={
+//           // <ProtectedRoute allowedRoles={["shipper"]}>
+//           <DashboardLayout />
+//           // </ProtectedRoute>
+//         }
+//       >
+//         <Route index element={<div>Shipper Dashboard</div>} />
+//         <Route path="pending" element={<div>Pending Deliveries</div>} />
+//       </Route>
 
-      <Route path="/notfound" element={<NotFoundPage />} />
+//       {/* Default redirection based on login status */}
+//       <Route
+//         path="/"
+//         element={
+//           isLoggedIn ? (
+//             <Navigate
+//               to={`/dashboard/${localStorage.getItem("userRole")}`}
+//               replace
+//             />
+//           ) : (
+//             <Navigate to="/dashboard/logindashboard" replace />
+//           )
+//         }
+//       />
 
-      <Route
-        path="*"
-        element={
-          isLoggedIn ? (
-            <Navigate to="/dashboard/notfound" replace />
-          ) : (
-            <Navigate to="/dashboard/logindashboard" replace />
-          )
-        }
-      />
-    </Routes>
-  );
-}
+//       <Route path="/notfound" element={<NotFoundPage />} />
+
+//       <Route
+//         path="*"
+//         element={
+//           isLoggedIn ? (
+//             <Navigate to="/dashboard/notfound" replace />
+//           ) : (
+//             <Navigate to="/dashboard/logindashboard" replace />
+//           )
+//         }
+//       />
+//     </Routes>
+//   );
+// }

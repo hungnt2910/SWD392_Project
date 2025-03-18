@@ -15,6 +15,7 @@ import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import { Link, useNavigate } from "react-router-dom";
 import { useCart } from "../hooks/useCart";
 import { useState } from "react";
+import { jwtDecode } from "jwt-decode";
 
 const Header = () => {
     const nav = useNavigate();
@@ -37,9 +38,12 @@ const Header = () => {
 
     const handleLogout = () => {
         localStorage.removeItem('token')
+        nav('/login')
     }
 
     const token = localStorage.getItem('token')
+    const decode = token ? jwtDecode<{ role: string }>(token) : null;
+    const userRole = decode?.role
 
     return (
         <AppBar position="fixed" color="default" sx={{ boxShadow: 2 }}>
@@ -55,38 +59,58 @@ const Header = () => {
                         Skincare Store
                     </Typography>
                 </Box>
-
-                <Box sx={{ display: "flex", gap: 2 }}>
-                    <Button color="inherit" component={Link} to="/">Home</Button>
-                    <Button color="inherit" component={Link} to="/contact">Contact</Button>
-                    <Button color="inherit" component={Link} to="/quiz">Quiz</Button>
-                </Box>
+                {
+                    userRole !== "Shipper" &&
+                    <Box sx={{ display: "flex", gap: 2 }}>
+                        <Button color="inherit" component={Link} to="/">Home</Button>
+                        <Button color="inherit" component={Link} to="/contact">Contact</Button>
+                        <Button color="inherit" component={Link} to="/quiz">Quiz</Button>
+                    </Box>
+                }
 
                 <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-                    <TextField
-                        variant="outlined"
-                        size="small"
-                        placeholder="Search..."
-                        sx={{ width: 300 }}
-                        value={search}
-                        onChange={(e) => setSearch(e.target.value)}
-                        onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-                    />
-                    <IconButton color="inherit" onClick={handleSearch}>
-                        <SearchIcon />
-                    </IconButton>
-                    <Button startIcon={<ShoppingCartIcon />} onClick={() => nav("/cart")}>
-                        ({cart.reduce((total, item) => total + item.quantity, 0)})
-                    </Button>
+                    {
+                        userRole !== "Shipper" && (
+                            <>
+                                <TextField
+                                    variant="outlined"
+                                    size="small"
+                                    placeholder="Search..."
+                                    sx={{ width: 300 }}
+                                    value={search}
+                                    onChange={(e) => setSearch(e.target.value)}
+                                    onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+                                />
+                                <IconButton color="inherit" onClick={handleSearch}>
+                                    <SearchIcon />
+                                </IconButton>
+                                <Button
+                                    startIcon={<ShoppingCartIcon />}
+                                    onClick={() => nav("/cart")}
+                                    sx={{ color: "#D81B60", fontWeight: "bold", "&:hover": { color: "#B0003A" } }}
+                                >
+                                    ({cart.reduce((total, item) => total + item.quantity, 0)})
+                                </Button>
+                            </>
+                        )
+                    }
                     <IconButton color="inherit" onClick={handleMenuOpen} sx={{ fontSize: 32 }}>
                         <AccountCircleIcon fontSize="large" />
                     </IconButton>
+
                     <Menu
                         anchorEl={anchorEl}
                         open={Boolean(anchorEl)}
                         onClose={handleMenuClose}
                     >
                         {/* <MenuItem onClick={() => { nav("/profile"); handleMenuClose(); }}>Profile</MenuItem> */}
+                        {token &&
+                            <MenuItem onClick={() => { nav("/skincareroutine"); handleMenuClose(); }}>Skin Care Routine</MenuItem>
+                        }
+
+                        {userRole === "Admin" &&
+                            <MenuItem onClick={() => { nav("/skincareroutine"); handleMenuClose(); }}>Admin</MenuItem>
+                        }
                         {token ?
                             <MenuItem onClick={() => { handleLogout(); handleMenuClose(); }}>Logout</MenuItem>
                             :

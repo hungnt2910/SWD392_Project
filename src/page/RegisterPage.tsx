@@ -25,8 +25,10 @@ function RegisterPage() {
             axios.post(`${portserver}/auth/signup`, { username, email, password })
                 .then(res => {
                     if (res.data.message === "Register success") {
-                        toast.success("Register success")
-                        nav('/login')
+                        toast.success("Register success", {
+                            autoClose: 500,
+                            onClose: () => nav('/login')
+                        })
                     } else {
                         toast.error("Register failed")
                     }

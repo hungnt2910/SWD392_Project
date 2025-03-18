@@ -1,12 +1,11 @@
 import * as React from 'react';
 import Stack from '@mui/material/Stack';
-import CustomDatePicker from './CustomDatePicker';// để trưng
-import NavbarBreadcrumbs from './NavbarBreadcrumbs';// show trang hiện tại
+import NavbarBreadcrumbs from './NavbarBreadcrumbs';
 import ColorModeIconDropdown from '../../shared-theme/ColorModeIconDropdown';
 import Avatar from '@mui/material/Avatar';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
-import HeaderOptionsMenu from './OptionsMenu';// 3 chấm logout
+import HeaderOptionsMenu from './OptionsMenu';
 
 export default function Header() {
   return (
@@ -22,14 +21,9 @@ export default function Header() {
       }}
       spacing={2}
     >
-      
+
       <NavbarBreadcrumbs />
       <Stack direction="row" sx={{ gap: 1 }}>
-        {/* <Search /> */}
-        <CustomDatePicker />
-        {/* <MenuButton showBadge aria-label="Open notifications">
-          <NotificationsRoundedIcon />
-        </MenuButton> */}
         <Avatar
           sizes="small"
           alt="Riley Carter"
@@ -44,7 +38,6 @@ export default function Header() {
             riley@email.com
           </Typography>
         </Box>
-        <HeaderOptionsMenu />
         <ColorModeIconDropdown />
       </Stack>
     </Stack>

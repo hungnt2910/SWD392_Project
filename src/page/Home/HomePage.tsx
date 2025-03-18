@@ -1,7 +1,8 @@
-import { Container, Card, CardMedia } from "@mui/material";
+import { Container, Card, CardMedia, Box } from "@mui/material";
 import ImageCarousel from "../../components/ImageCarousel";
 import BestSell from "./BestSell";
 import OurProduct from "./OurProduct";
+import media from '../../assets/set-of-flyers-with-woman-cosmetics-beauty-products-beauty-skin-care-cosmetics-shower-concept-illustration-for-banner-card-advertising-poster-vector.jpg'
 
 function HomePage() {
     return (
@@ -9,11 +10,11 @@ function HomePage() {
             <ImageCarousel />
             <BestSell />
 
-            <Container sx={{ my: 5 }}>
+            <Box sx={{ px: 7, my: 5 }}>
                 <Card>
-                    <CardMedia component="img" height="200" image="/promo-banner.jpg" alt="Ưu đãi skincare" />
+                    <CardMedia component="img" height="370" image={media} alt="Ưu đãi skincare" />
                 </Card>
-            </Container >
+            </Box>
 
             <OurProduct />
         </div>
