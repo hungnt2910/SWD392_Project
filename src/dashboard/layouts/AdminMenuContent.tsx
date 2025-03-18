@@ -22,7 +22,7 @@ import { NavLink, useLocation } from "react-router-dom";
 
 const adminMenuItems = [
   { text: "Dashboard", path: "/admin/dashboard", icon: <DashboardIcon /> },
-  { text: "Manage User", path: "/dashboard/admin/users", icon: <PeopleIcon /> },
+  { text: "Manage User", path: "/admin/users", icon: <PeopleIcon /> },
 ];
 const voucherSubMenuItems = [
   {

@@ -31,7 +31,7 @@ const OrderConfirm: React.FC = () => {
   const [detailDialog, setDetailDialog] = useState<boolean>(false);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
 
-  const fetchPendingOrders = async () => {
+  const fetchPaidOrders = async () => {
     try {
       setLoading(true);
 
@@ -49,11 +49,11 @@ const OrderConfirm: React.FC = () => {
         },
       });
 
-      const pendingOrders = response.data.filter(
-        (order: Order) => order.status === "Pending"
+      const paidOrders = response.data.filter(
+        (order: Order) => order.status === "Paid"
       );
 
-      setOrders(pendingOrders);
+      setOrders(paidOrders);
       setError(null);
     } catch (err) {
       console.error("Error fetching orders:", err);
@@ -64,7 +64,7 @@ const OrderConfirm: React.FC = () => {
   };
 
   useEffect(() => {
-    fetchPendingOrders();
+    fetchPaidOrders();
   }, []);
 
   const handleViewOrder = (order: Order) => {
@@ -188,7 +188,7 @@ const OrderConfirm: React.FC = () => {
       minWidth: 120,
       headerAlign: "center",
       align: "center",
-      renderCell: () => <Chip label="Pending" color="warning" size="small" />,
+      renderCell: () => <Chip label="Paid" color="info" size="small" />,
     },
     {
       field: "actions",
@@ -201,49 +201,54 @@ const OrderConfirm: React.FC = () => {
       align: "center",
       renderCell: (params) => (
         <Box
-        sx={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          width: "100%",
-          height: "100%"
-        }}
-      >
-        <Stack direction="row" spacing={1} justifyContent="center" alignItems="center">
-          <Tooltip title="View Details">
-            <IconButton
-              color="info"
-              onClick={() => handleViewOrder(params.row)}
-              size="small"
-              disabled={processing}
-            >
-              <VisibilityIcon fontSize="small" />
-            </IconButton>
-          </Tooltip>
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            width: "100%",
+            height: "100%",
+          }}
+        >
+          <Stack
+            direction="row"
+            spacing={1}
+            justifyContent="center"
+            alignItems="center"
+          >
+            <Tooltip title="View Details">
+              <IconButton
+                color="info"
+                onClick={() => handleViewOrder(params.row)}
+                size="small"
+                disabled={processing}
+              >
+                <VisibilityIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
 
-          <Tooltip title="Confirm Order">
-            <IconButton
-              color="success"
-              onClick={() => handleConfirmOrder(params.row.orderId)}
-              size="small"
-              disabled={processing}
-            >
-              <CheckCircleIcon fontSize="small" />
-            </IconButton>
-          </Tooltip>
+            <Tooltip title="Confirm Order">
+              <IconButton
+                color="success"
+                onClick={() => handleConfirmOrder(params.row.orderId)}
+                size="small"
+                disabled={processing}
+              >
+                <CheckCircleIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
 
-          <Tooltip title="Cancel Order">
-            <IconButton
-              color="error"
-              onClick={() => handleCancelOrder(params.row.orderId)}
-              size="small"
-              disabled={processing}
-            >
-              <CancelIcon fontSize="small" />
-            </IconButton>
-          </Tooltip>
-        </Stack>
-      </Box>
+            <Tooltip title="Cancel Order">
+              <IconButton
+                color="error"
+                onClick={() => handleCancelOrder(params.row.orderId)}
+                size="small"
+                disabled={processing}
+              >
+                <CancelIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
+          </Stack>
+        </Box>
       ),
     },
   ];
@@ -278,7 +283,7 @@ const OrderConfirm: React.FC = () => {
       )}
 
       {orders.length === 0 && !loading && !error ? (
-        <Alert severity="info">No pending orders to confirm.</Alert>
+        <Alert severity="info">No paid orders to confirm.</Alert>
       ) : (
         <Box
           sx={{

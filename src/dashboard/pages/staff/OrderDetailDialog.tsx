@@ -98,7 +98,7 @@ const OrderDetailDialog: React.FC<OrderDetailDialogProps> = ({
 
   if (!order) return null;
 
-  const isPending = order.status === "Pending";
+  const isPaid = order.status === "Paid";
 
   const handleConfirm = async () => {
     if (!onConfirmOrder) return;
@@ -247,9 +247,7 @@ const OrderDetailDialog: React.FC<OrderDetailDialogProps> = ({
           Close
         </Button>
 
-        {/* Chỉ hiển thị nút xác nhận và hủy nếu đơn hàng đang ở trạng thái "Pending" 
-            và callbacks tương ứng được cung cấp */}
-        {isPending && onConfirmOrder && (
+        {isPaid && onConfirmOrder && (
           <Button
             variant="contained"
             color="success"
@@ -261,7 +259,7 @@ const OrderDetailDialog: React.FC<OrderDetailDialogProps> = ({
           </Button>
         )}
 
-        {isPending && onCancelOrder && (
+        {isPaid && onCancelOrder && (
           <Button
             variant="contained"
             color="error"
@@ -274,7 +272,6 @@ const OrderDetailDialog: React.FC<OrderDetailDialogProps> = ({
         )}
       </DialogActions>
 
-      {/* Overlay khi đang xử lý */}
       {isProcessing && (
         <Box
           sx={{

@@ -75,6 +75,22 @@ function App() {
           <Route index element={<Navigate to="members" replace />} />
           <Route path="goods" element={<CheckLogin><ManageGoods /></CheckLogin>} />
           <Route path="members" element={<CheckLogin><ManageMembers /></CheckLogin>} />
+          <Route path="orders/all" element={<CheckLogin><OrderList /></CheckLogin>} />
+          <Route path="orders/confirm" element={<CheckLogin><OrderConfirm /></CheckLogin>} />
+          <Route path="reviews" element={<CheckLogin><ManageReviews /></CheckLogin>} />
+          <Route path="blogs" element={<CheckLogin><ManageBlogs /></CheckLogin>} />
+          <Route path="voucher" element={<CheckLogin><CreateVoucher /></CheckLogin>} />
+        </Route>
+
+        {/* Admin */}
+        <Route path="/admin" element={
+          <ProtectRoute requireRoles={["Admin"]} >
+            <DashboardLayout />
+          </ProtectRoute>
+        }>
+          <Route index element={<Navigate to="dashboard" replace />} />
+          <Route path="dashboard" element={<CheckLogin><Dashboard /></CheckLogin>} />
+          <Route path="users" element={<CheckLogin><ManageUsers /></CheckLogin>} />
         </Route>
 
         <Route path="*" element={<NotFoundPage />} />

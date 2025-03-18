@@ -424,7 +424,6 @@ export default function ManageGoods() {
       >
         <Box sx={{ display: "flex", flexGrow: 1, minWidth: 250 }}>
           <TextField
-            label="Search Products"
             variant="outlined"
             size="small"
             value={searchTerm}

@@ -12,8 +12,10 @@ import ListIcon from '@mui/icons-material/List';
 import SwapHorizIcon from '@mui/icons-material/SwapHoriz';
 import FeedbackIcon from '@mui/icons-material/Feedback';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
+import LocalOfferIcon from '@mui/icons-material/LocalOffer';
 import ExpandLess from '@mui/icons-material/ExpandLess';
 import ExpandMore from '@mui/icons-material/ExpandMore';
+import ArticleIcon from '@mui/icons-material/Article';
 import Collapse from '@mui/material/Collapse';
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { CiLogout } from "react-icons/ci";
@@ -22,16 +24,16 @@ const mainMenuItems = [
   { text: "Manage Members", path: "/staff/members", icon: <GroupIcon /> },
   { text: "Manage Goods", path: "/staff/goods", icon: <InventoryIcon /> },
   //   { text: "Manage Skintype MCQs", path: "/dashboard/staff/skintype", icon: <QuizIcon /> },
-  { text: "Manage Reviews", path: "/dashboard/staff/reviews", icon: <FeedbackIcon /> },
-  //   { text: "Manage Blogs", path: "/dashboard/staff/blogs", icon: <ArticleIcon /> },
+  { text: "Manage Reviews", path: "/staff/reviews", icon: <FeedbackIcon /> },
+    { text: "Manage Blogs", path: "/staff/blogs", icon: <ArticleIcon /> },
   //   { text: "Customize Skin Route", path: "/dashboard/staff/skin-route", icon: <RouteIcon /> },
-  //   { text: "Create Voucher", path: "/dashboard/staff/voucher", icon: <LocalOfferIcon /> },
+    { text: "Create Voucher", path: "/staff/voucher", icon: <LocalOfferIcon /> },
 ];
 
 const orderSubMenuItems = [
-  { text: "All Orders", path: "/dashboard/staff/orders/all", icon: <ListIcon /> },
-  { text: "Pending Refund", path: "/dashboard/staff/orders/refund", icon: <SwapHorizIcon /> },
-  { text: "Pending Confirm", path: "/dashboard/staff/orders/confirm", icon: <CheckCircleOutlineIcon /> },
+  { text: "All Orders", path: "/staff/orders/all", icon: <ListIcon /> },
+  { text: "Pending Refund", path: "/staff/orders/refund", icon: <SwapHorizIcon /> },
+  { text: "Pending Confirm", path: "/staff/orders/confirm", icon: <CheckCircleOutlineIcon /> },
 ];
 
 const secondaryListItems = { text: 'Logout', icon: <CiLogout /> }
