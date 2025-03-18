@@ -12,14 +12,15 @@ import Tooltip from '@mui/material/Tooltip';
 import axios from 'axios';
 import CircularProgress from '@mui/material/CircularProgress';
 import Alert from '@mui/material/Alert';
+import { portserver } from "../../../utils/portserver";
 
 interface User {
   id: number;
-  name: string;
-  password: string;
+  username: string;
+  password?: string;
   phone: string;
   address: string;
-  status: 'active' | 'inactive' | 'pending';
+  status: 'active' | 'inactive';
   loyaltyPoints: number;
 }
 
@@ -32,23 +33,13 @@ export default function ManageMembers() {
     const fetchUsers = async () => {
       try {
         setLoading(true);
-        const response = await axios.get('https://your-api-endpoint.com/users');
+        const response = await axios.get(`${portserver}/admin/user`);
         setUsers(response.data);
         setError(null);
       } catch (err) {
         console.error('Error fetching users:', err);
         setError('Failed to load users. Please try again later.');
-        setUsers([
-            { id: 1, name: 'John Doe', password: 'pass123', phone: '123-456-7890', address: '123 Main St', status: 'active', loyaltyPoints: 250 },
-            { id: 2, name: 'Jane Smith', password: 'pass456', phone: '987-654-3210', address: '456 Oak Ave', status: 'active', loyaltyPoints: 500 },
-            { id: 3, name: 'Bob Johnson', password: 'pass789', phone: '555-123-4567', address: '789 Pine Rd', status: 'inactive', loyaltyPoints: 100 },
-            { id: 4, name: 'Alice Brown', password: 'pass321', phone: '555-987-6543', address: '321 Elm St', status: 'pending', loyaltyPoints: 0 },
-            { id: 5, name: 'Charlie Wilson', password: 'pass654', phone: '555-789-0123', address: '654 Maple Dr', status: 'active', loyaltyPoints: 750 },
-            { id: 6, name: 'Diana Miller', password: 'pass987', phone: '555-456-7890', address: '987 Cedar Ln', status: 'inactive', loyaltyPoints: 50 },
-            { id: 7, name: 'Edward Davis', password: 'pass135', phone: '555-246-8024', address: '135 Birch Ave', status: 'active', loyaltyPoints: 300 },
-            { id: 8, name: 'Fiona Clark', password: 'pass246', phone: '555-135-7913', address: '246 Walnut St', status: 'active', loyaltyPoints: 450 },
-            { id: 9, name: 'George White', password: 'pass357', phone: '555-802-4680', address: '357 Cherry Rd', status: 'pending', loyaltyPoints: 25 },
-          ]);
+
       } finally {
         setLoading(false);
       }
@@ -97,7 +88,7 @@ export default function ManageMembers() {
       align: 'center'
     },
     {
-      field: 'name',
+      field: 'username',
       headerName: 'Name',
       flex: 1,
       minWidth: 120,
@@ -157,6 +148,15 @@ export default function ManageMembers() {
       headerAlign: 'center',
       align: 'center',
       renderCell: (params: GridRenderCellParams<User>) => (
+        <Box
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          width: "100%",
+          height: "100%"
+        }}
+      >
         <Stack direction="row" spacing={1} justifyContent="center" width="100%">
           <Tooltip title="Edit User">
             <IconButton
@@ -190,6 +190,7 @@ export default function ManageMembers() {
             </Tooltip>
           )}
         </Stack>
+        </Box>
       ),
     },
   ];
@@ -221,7 +222,6 @@ export default function ManageMembers() {
         pageSizeOptions={[10, 15, 30]}
         checkboxSelection
         disableRowSelectionOnClick
-        autoHeight
         disableColumnMenu
         sx={{
           '& .MuiDataGrid-cell:focus': {

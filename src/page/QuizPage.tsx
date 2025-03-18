@@ -1,50 +1,53 @@
 import React, { useEffect, useState } from "react";
-import { Container, Card, CardContent, Typography, Radio, RadioGroup, FormControlLabel, Button } from "@mui/material";
+import {
+    Container, Card, CardContent, Typography, Radio, RadioGroup, FormControlLabel,
+    Button, CircularProgress, Dialog, DialogTitle, DialogContent, DialogActions, Box
+} from "@mui/material";
 import axios from "axios";
 import { portserver } from "../utils/portserver";
-import { Dialog, DialogTitle, DialogContent, DialogActions } from "@mui/material";
 import { LuNotebookText } from "react-icons/lu";
 import { toast, ToastContainer } from "react-toastify";
+import { motion } from "framer-motion";
+import sensitiveSkin from '../assets/dry_skin.png';
+import drySkin from '../assets/sensitive_skin.png';
+import normalSkin from '../assets/normal_skin.png';
+import oilSkin from '../assets/oily_skin.png';
+import { jwtDecode } from "jwt-decode";
 
 type Quiz = {
     quizId: number;
     title: string;
-    choices: { quizChoiceId: number, choice: String }[];
-}
+    choices: { quizChoiceId: number; choice: string }[];
+};
 
-type SelectedAnswers = {
+type SelectedAnswer = {
     quizId: number;
     quizChoiceId: number;
-}
+};
 
-const QuizPage = () => {
-    const [selectedAnswers, setSelectedAnswers] = useState<SelectedAnswers[]>([]);
+type SkinType = "Da dầu" | "Da nhạy cảm" | "Da thường" | "Da khô" | "";
+
+const QuizPage: React.FC = () => {
+    const [selectedAnswers, setSelectedAnswers] = useState<SelectedAnswer[]>([]);
     const [quizs, setQuizs] = useState<Quiz[]>([]);
-    const [result, setResult] = useState<string>("");
+    const [result, setResult] = useState<SkinType>("");
     const [openDialog, setOpenDialog] = useState<boolean>(false);
     const [isLoading, setIsLoading] = useState<boolean>(false);
-
-
-    const getAllQuiz = async () => {
-        axios.get(`${portserver}/quiz`)
-            .then(res => {
-                setQuizs(res.data)
-            })
-            .catch(err => {
-                console.log("get quiz error", err)
-            })
-    }
+    const token = localStorage.getItem('token');
+    const decode = token ? jwtDecode<{ userId: number }>(token) : null;
 
     useEffect(() => {
-        getAllQuiz()
-    }, [])
+        axios.get(`${portserver}/quiz`)
+            .then(res => setQuizs(res.data))
+            .catch(err => console.log("get quiz error", err));
+    }, []);
 
     const handleChange = (quizId: number, quizChoiceId: number) => {
-        setSelectedAnswers((prev) => {
+        setSelectedAnswers(prev => {
             const updatedAnswers = prev.filter(answer => answer.quizId !== quizId);
             return [...updatedAnswers, { quizId, quizChoiceId }];
         });
-    }
+    };
 
     const handleSubmit = async () => {
         if (selectedAnswers.length !== quizs.length) {
@@ -58,12 +61,13 @@ const QuizPage = () => {
         const formatedAns = selectedAnswers.map((a) => ({ quizId: a.quizId, quizAnswer: a.quizChoiceId }))
 
         try {
-            await axios.post(`${portserver}/quiz`, formatedAns)
+            await axios.post(`${portserver}/quiz/${decode?.userId}`, formatedAns)
                 .then(res => {
                     setResult(res.data)
                     setTimeout(() => {
                         setIsLoading(false);
-                        setOpenDialog(true)
+                        setOpenDialog(true);
+                        setSelectedAnswers([])
                     }, 1500)
                 })
         } catch (error) {
@@ -71,46 +75,98 @@ const QuizPage = () => {
         }
     };
 
-    return (
-        <>
-            <Container maxWidth="md" style={{ marginTop: "20px" }}>
-                <ToastContainer />
-                <Dialog open={openDialog || isLoading} onClose={() => setOpenDialog(false)} fullWidth>
-                    <DialogTitle>Result &nbsp;<LuNotebookText /></DialogTitle>
-                    <DialogContent>
-                        {isLoading ? (
-                            <Typography>Loading...</Typography>
-                        ) :
-                            <Typography>{result}</Typography>
-                        }
-                    </DialogContent>
-                    {!isLoading && (
-                        <DialogActions>
-                            <Button onClick={() => setOpenDialog(false)} color="primary">
-                                Close
-                            </Button>
-                        </DialogActions>
-                    )}
-                </Dialog>
+    const getSkinTypeImage = (skinType: SkinType): string => {
+        const images: Record<SkinType, string> = {
+            "Da dầu": oilSkin,
+            "Da nhạy cảm": sensitiveSkin,
+            "Da thường": normalSkin,
+            "Da khô": drySkin,
+            "": "https://example.com/default-skin.jpg"
+        };
+        return images[skinType];
+    };
 
-                {quizs?.map((q) => (
-                    <Card key={q.quizId} style={{ marginBottom: "20px" }}>
+    return (
+        <Container maxWidth="md" sx={{ mt: 4 }}>
+            <ToastContainer />
+            <Dialog open={openDialog || isLoading} onClose={() => setOpenDialog(false)} fullWidth>
+                <DialogTitle sx={{
+                    background: "linear-gradient(to right, #6a11cb, #2575fc)",
+                    color: "white",
+                    textAlign: "center"
+                }}>
+                    <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 1 }}>
+                        <Typography variant="h6" fontWeight="bold">Result</Typography>
+                        <LuNotebookText size={24} />
+                    </Box>
+                </DialogTitle>
+                <DialogContent>
+                    {isLoading ? (
+                        <Box display="flex" flexDirection="column" alignItems="center" justifyContent="center" height={200}>
+                            <CircularProgress color="secondary" />
+                            <Typography mt={2}>processing...</Typography>
+                        </Box>
+                    ) : (
+                        <motion.div initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.5 }}>
+                            <Box display="flex" flexDirection="column" alignItems="center" textAlign="center" p={2}>
+                                <Typography variant="h5" fontWeight="bold" color="#6a11cb" gutterBottom>{result}</Typography>
+                                <motion.img
+                                    src={getSkinTypeImage(result)}
+                                    alt={result}
+                                    style={{ width: 150, height: 150, borderRadius: 10, marginBottom: 10 }}
+                                    initial={{ opacity: 0, y: -20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ duration: 0.6, ease: "easeOut" }}
+                                />
+                            </Box>
+                        </motion.div>
+                    )}
+                </DialogContent>
+                {!isLoading && (
+                    <DialogActions sx={{ justifyContent: "center", paddingBottom: 2 }}>
+                        <Button
+                            onClick={() => setOpenDialog(false)}
+                            variant="contained"
+                            sx={{
+                                background: "linear-gradient(to right, #6a11cb, #2575fc)",
+                                color: "white",
+                                px: 3,
+                                "&:hover": { background: "linear-gradient(to right, #5a0fc8, #2061db)" }
+                            }}
+                        >
+                            Đóng
+                        </Button>
+                    </DialogActions>
+                )}
+            </Dialog>
+            <Typography variant="h4" sx={{ mb: 3, textAlign: "center", fontWeight: "bold" }}>Take the quiz to better understand your skin.</Typography>
+            {quizs.map(q => (
+                <motion.div key={q.quizId} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
+                    <Card sx={{ mb: 3, boxShadow: 3, borderRadius: 2 }}>
                         <CardContent>
-                            <Typography variant="h6">{q.title}</Typography>
+                            <Typography variant="h6" sx={{ fontWeight: "bold", mb: 1 }}>{q.title}</Typography>
                             <RadioGroup
-                                value={selectedAnswers.find((a) => a.quizId === q.quizId)?.quizChoiceId || ""}
-                                onChange={(e) => handleChange(q.quizId, q.choices.find((c) => c.quizChoiceId === Number(e.target.value))?.quizChoiceId || 0)}
+                                value={selectedAnswers.find(a => a.quizId === q.quizId)?.quizChoiceId || ""}
+                                onChange={(e) => handleChange(q.quizId, Number(e.target.value))}
                             >
-                                {q.choices.map((option) => (
+                                {q.choices.map(option => (
                                     <FormControlLabel key={option.quizChoiceId} value={option.quizChoiceId} control={<Radio />} label={option.choice} />
                                 ))}
                             </RadioGroup>
                         </CardContent>
                     </Card>
-                ))}
-                <Button variant="contained" color="primary" onClick={handleSubmit}>Submit</Button>
-            </Container>
-        </>
+                </motion.div>
+            ))}
+            <Button variant="contained" onClick={handleSubmit} sx={{
+                background: "linear-gradient(to right, #6a11cb, #2575fc)",
+                color: "white",
+                display: "block",
+                mx: "auto",
+                mt: 3,
+                px: 5,
+                "&:hover": { background: "linear-gradient(to right, #5a0fc8, #2061db)" }
+            }}>Submit</Button>
+        </Container>
     );
 };
 

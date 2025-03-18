@@ -8,121 +8,165 @@ import IconButton from "@mui/material/IconButton";
 import Tooltip from "@mui/material/Tooltip";
 import CircularProgress from "@mui/material/CircularProgress";
 import Alert from "@mui/material/Alert";
-import { DataGrid, GridColDef, GridRenderCellParams } from "@mui/x-data-grid";
+import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import CancelIcon from "@mui/icons-material/Cancel";
+import axios from "axios";
+import { portserver } from "../../../utils/portserver";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
-interface Order {
-  id: number;
-  orderId: number;
-  customerName: string;
-  customerId: number;
-  totalAmount: number;
-  status: "Pending" | "Approved" | "Delivered" | "Cancelled";
-  date: string;
-}
-
-const sampleOrders: Order[] = [
-  {
-    id: 2,
-    orderId: 18908425,
-    customerName: "Emily Johnson",
-    customerId: 1002,
-    totalAmount: 89.5,
-    status: "Pending",
-    date: "3 March 2022",
-  },
-  {
-    id: 6,
-    orderId: 18908429,
-    customerName: "Lisa Rodriguez",
-    customerId: 1006,
-    totalAmount: 112.75,
-    status: "Pending",
-    date: "8 March 2022",
-  },
-  {
-    id: 7,
-    orderId: 18908430,
-    customerName: "Robert Taylor",
-    customerId: 1007,
-    totalAmount: 67.99,
-    status: "Pending",
-    date: "9 March 2022",
-  },
-];
+import OrderDetailDialog, {
+  Order,
+  formatPrice,
+  formatDate,
+} from "./OrderDetailDialog";
 
 const OrderConfirm: React.FC = () => {
-  const [orders, setOrders] = useState<Order[]>(sampleOrders);
-  const [loading, setLoading] = useState<boolean>(false);
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [processing, setProcessing] = useState<boolean>(false);
+  const [detailDialog, setDetailDialog] = useState<boolean>(false);
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
 
-  const handleViewOrder = (orderId: number) => {
-    console.log(`View details for order ID: ${orderId}`);
-  };
+  const fetchPaidOrders = async () => {
+    try {
+      setLoading(true);
 
-  const handleConfirmOrder = (orderId: number) => {
-    console.log(`Confirming order ID: ${orderId}`);
-    setLoading(true);
+      const token = localStorage.getItem("token");
 
-    setTimeout(() => {
-      setOrders((prevOrders) =>
-        prevOrders.map((order) =>
-          order.orderId === orderId ? { ...order, status: "Approved" } : order
-        )
+      if (!token) {
+        setError("Authentication token not found. Please login again.");
+        setLoading(false);
+        return;
+      }
+
+      const response = await axios.get(`${portserver}/orders`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const paidOrders = response.data.filter(
+        (order: Order) => order.status === "Paid"
       );
+
+      setOrders(paidOrders);
+      setError(null);
+    } catch (err) {
+      console.error("Error fetching orders:", err);
+      setError("Failed to load orders. Please try again later.");
+    } finally {
       setLoading(false);
-    }, 500);
+    }
   };
 
-  const handleCancelOrder = (orderId: number) => {
-    console.log(`Cancelling order ID: ${orderId}`);
-    setLoading(true);
+  useEffect(() => {
+    fetchPaidOrders();
+  }, []);
 
-    setTimeout(() => {
-      setOrders((prevOrders) =>
-        prevOrders.map((order) =>
-          order.orderId === orderId ? { ...order, status: "Cancelled" } : order
-        )
+  const handleViewOrder = (order: Order) => {
+    setSelectedOrder(order);
+    setDetailDialog(true);
+  };
+
+  const handleConfirmOrder = async (orderId: number) => {
+    try {
+      setProcessing(true);
+
+      const token = localStorage.getItem("token");
+
+      if (!token) {
+        toast.error("Authentication token not found. Please login again.");
+        setProcessing(false);
+        return;
+      }
+
+      await axios.put(
+        `${portserver}/orders/confirm/${orderId}`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
-      setLoading(false);
-    }, 500);
+
+      setOrders((prevOrders) =>
+        prevOrders.filter((order) => order.orderId !== orderId)
+      );
+
+      toast.success(`Order #${orderId} has been confirmed successfully!`);
+      setDetailDialog(false);
+    } catch (err) {
+      console.error("Error confirming order:", err);
+      toast.error("Failed to confirm order. Please try again.");
+      throw err;
+    } finally {
+      setProcessing(false);
+    }
   };
 
-  const formatPrice = (price: number) => {
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD",
-    }).format(price);
+  const handleCancelOrder = async (orderId: number) => {
+    try {
+      setProcessing(true);
+
+      const token = localStorage.getItem("token");
+
+      if (!token) {
+        toast.error("Authentication token not found. Please login again.");
+        setProcessing(false);
+        return;
+      }
+
+      await axios.put(
+        `${portserver}/orders/cancel/${orderId}`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      setOrders((prevOrders) =>
+        prevOrders.filter((order) => order.orderId !== orderId)
+      );
+
+      toast.info(`Order #${orderId} has been cancelled.`);
+      setDetailDialog(false);
+    } catch (err) {
+      console.error("Error cancelling order:", err);
+      toast.error("Failed to cancel order. Please try again.");
+      throw err;
+    } finally {
+      setProcessing(false);
+    }
   };
 
   const columns: GridColDef[] = [
     {
       field: "orderId",
-      headerName: "Tracking ID",
-      flex: 0.8,
-      minWidth: 100,
+      headerName: "Order ID",
+      flex: 0.6,
+      minWidth: 90,
       headerAlign: "center",
       align: "center",
     },
     {
-      field: "customerName",
-      headerName: "Customer Name",
-      flex: 1.2,
-      minWidth: 150,
-      editable: false,
+      field: "shippingAddress",
+      headerName: "Shipping Address",
+      flex: 1.5,
+      minWidth: 250,
+      renderCell: (params) => {
+        const address = params.value;
+        return address.length > 40 ? `${address.substring(0, 40)}...` : address;
+      },
     },
     {
-      field: "customerId",
-      headerName: "Customer ID",
-      flex: 0.8,
-      minWidth: 100,
-      headerAlign: "center",
-      align: "center",
-    },
-    {
-      field: "totalAmount",
+      field: "amount",
       headerName: "Total Amount",
       flex: 1,
       minWidth: 120,
@@ -131,10 +175,11 @@ const OrderConfirm: React.FC = () => {
       renderCell: (params) => formatPrice(params.value),
     },
     {
-      field: "date",
+      field: "timestamp",
       headerName: "Date",
-      flex: 1,
-      minWidth: 120,
+      flex: 1.2,
+      minWidth: 180,
+      renderCell: (params) => formatDate(params.value),
     },
     {
       field: "status",
@@ -143,29 +188,7 @@ const OrderConfirm: React.FC = () => {
       minWidth: 120,
       headerAlign: "center",
       align: "center",
-      renderCell: (params: GridRenderCellParams<Order, string>) => {
-        let chipColor;
-        switch (params.value) {
-          case "Approved":
-            chipColor = "success";
-            break;
-          case "Pending":
-            chipColor = "warning";
-            break;
-          case "Delivered":
-            chipColor = "info";
-            break;
-          case "Cancelled":
-            chipColor = "error";
-            break;
-          default:
-            chipColor = "default";
-        }
-
-        return (
-          <Chip label={params.value} color={chipColor as any} size="small" />
-        );
-      },
+      renderCell: () => <Chip label="Paid" color="info" size="small" />,
     },
     {
       field: "actions",
@@ -176,42 +199,56 @@ const OrderConfirm: React.FC = () => {
       filterable: false,
       headerAlign: "center",
       align: "center",
-      renderCell: (params: GridRenderCellParams<Order>) => (
-        <Stack direction="row" spacing={1} justifyContent="center">
-          <Tooltip title="View Details">
-            <IconButton
-              color="info"
-              onClick={() => handleViewOrder(params.row.orderId)}
-              size="small"
-            >
-              <VisibilityIcon fontSize="small" />
-            </IconButton>
-          </Tooltip>
+      renderCell: (params) => (
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            width: "100%",
+            height: "100%",
+          }}
+        >
+          <Stack
+            direction="row"
+            spacing={1}
+            justifyContent="center"
+            alignItems="center"
+          >
+            <Tooltip title="View Details">
+              <IconButton
+                color="info"
+                onClick={() => handleViewOrder(params.row)}
+                size="small"
+                disabled={processing}
+              >
+                <VisibilityIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
 
-          {params.row.status === "Pending" && (
-            <>
-              <Tooltip title="Confirm Order">
-                <IconButton
-                  color="success"
-                  onClick={() => handleConfirmOrder(params.row.orderId)}
-                  size="small"
-                >
-                  <CheckCircleIcon fontSize="small" />
-                </IconButton>
-              </Tooltip>
+            <Tooltip title="Confirm Order">
+              <IconButton
+                color="success"
+                onClick={() => handleConfirmOrder(params.row.orderId)}
+                size="small"
+                disabled={processing}
+              >
+                <CheckCircleIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
 
-              <Tooltip title="Cancel Order">
-                <IconButton
-                  color="error"
-                  onClick={() => handleCancelOrder(params.row.orderId)}
-                  size="small"
-                >
-                  <CancelIcon fontSize="small" />
-                </IconButton>
-              </Tooltip>
-            </>
-          )}
-        </Stack>
+            <Tooltip title="Cancel Order">
+              <IconButton
+                color="error"
+                onClick={() => handleCancelOrder(params.row.orderId)}
+                size="small"
+                disabled={processing}
+              >
+                <CancelIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
+          </Stack>
+        </Box>
       ),
     },
   ];
@@ -231,15 +268,10 @@ const OrderConfirm: React.FC = () => {
     );
   }
 
-  const displayedOrders = orders.filter(
-    (order) =>
-      order.status === "Pending" ||
-      order.status === "Approved" ||
-      order.status === "Cancelled"
-  );
-
   return (
     <Box sx={{ width: "100%", p: 2 }}>
+      <ToastContainer position="top-right" autoClose={3000} />
+
       <Typography variant="h5" component="h2" sx={{ mb: 2 }}>
         Order Confirmation
       </Typography>
@@ -250,39 +282,53 @@ const OrderConfirm: React.FC = () => {
         </Alert>
       )}
 
-      <Box
-        sx={{
-          height: 600,
-          width: "100%",
-          bgcolor: "background.paper",
-          boxShadow: 1,
-          borderRadius: 1,
-          overflow: "hidden",
-        }}
-      >
-        <DataGrid
-          rows={displayedOrders}
-          columns={columns}
-          initialState={{
-            pagination: {
-              paginationModel: {
-                pageSize: 10,
-              },
-            },
-          }}
-          pageSizeOptions={[10, 15, 30]}
-          checkboxSelection
-          disableRowSelectionOnClick
+      {orders.length === 0 && !loading && !error ? (
+        <Alert severity="info">No paid orders to confirm.</Alert>
+      ) : (
+        <Box
           sx={{
-            "& .MuiDataGrid-cell:focus": {
-              outline: "none",
-            },
-            "& .MuiDataGrid-cell:focus-within": {
-              outline: "none",
-            },
+            height: 600,
+            width: "100%",
+            bgcolor: "background.paper",
+            boxShadow: 1,
+            borderRadius: 1,
+            overflow: "hidden",
           }}
-        />
-      </Box>
+        >
+          <DataGrid
+            rows={orders}
+            columns={columns}
+            initialState={{
+              pagination: {
+                paginationModel: {
+                  pageSize: 10,
+                },
+              },
+            }}
+            pageSizeOptions={[10, 15, 30]}
+            disableRowSelectionOnClick
+            getRowId={(row) => row.orderId}
+            sx={{
+              "& .MuiDataGrid-cell:focus": {
+                outline: "none",
+              },
+              "& .MuiDataGrid-cell:focus-within": {
+                outline: "none",
+              },
+            }}
+          />
+        </Box>
+      )}
+
+      {/* Sử dụng OrderDetailDialog component */}
+      <OrderDetailDialog
+        open={detailDialog}
+        onClose={() => setDetailDialog(false)}
+        order={selectedOrder}
+        onConfirmOrder={handleConfirmOrder}
+        onCancelOrder={handleCancelOrder}
+        processing={processing}
+      />
     </Box>
   );
 };

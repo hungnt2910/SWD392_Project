@@ -7,6 +7,7 @@ import { portserver } from "../utils/portserver";
 import background from '../assets/cosmetic-background.jpg';
 import React from "react";
 import { VisibilityOff, Visibility } from "@mui/icons-material";
+import { jwtDecode } from "jwt-decode";
 
 
 function LoginPage() {
@@ -14,7 +15,6 @@ function LoginPage() {
 
     const [password, setPassword] = React.useState("");
     const [email, setEmail] = React.useState("");
-
 
     const validatePassword = (inputPassword: string): boolean => {
         const regex = /^(?!\d)[A-Za-z\d@$!%*?&#]{8,}$/;
@@ -36,15 +36,24 @@ function LoginPage() {
         event.preventDefault();
     };
 
+    const handleRole = () => {
+        if (localStorage.getItem("token") && jwtDecode<{ role: string }>(localStorage.getItem("token")!)?.role === "Staff") {
+            nav('/staff')
+        } else if (localStorage.getItem("token") && jwtDecode<{ role: string }>(localStorage.getItem("token")!)?.role === "Shipper") {
+            nav('/shipper')
+        } else {
+            nav('/')
+        }
+    };
+
     const handleLogin = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         axios.post(`${portserver}/auth/signin`, { email, password })
             .then(res => {
-                console.log(res.data)
                 if (res.data.accessToken !== undefined) {
                     toast.success("Login success", {
                         autoClose: 1000,
-                        onClose: () => nav('/home')
+                        onClose: () => handleRole()
                     })
                     localStorage.setItem("token", res.data.accessToken)
                 } else {
