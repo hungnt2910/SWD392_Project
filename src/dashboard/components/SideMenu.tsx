@@ -5,7 +5,10 @@ import Toolbar from "@mui/material/Toolbar";
 import Divider from "@mui/material/Divider";
 import Typography from "@mui/material/Typography";
 import { useTheme } from "@mui/material/styles";
-
+import { useState, useEffect } from "react";
+import { jwtDecode } from "jwt-decode";
+import AccountCircleIcon from "@mui/icons-material/AccountCircle";
+import Stack from "@mui/material/Stack";
 
 interface SideMenuProps {
   children?: React.ReactNode;
@@ -14,6 +17,27 @@ interface SideMenuProps {
 export default function SideMenu({ children }: SideMenuProps) {
   const theme = useTheme();
   const drawerWidth = 240;
+  const [role, setRole] = useState("Dashboard");
+
+  useEffect(() => {
+    try {
+      const token = localStorage.getItem("token");
+      if (token) {
+        // Decode JWT và lấy role
+        const decoded = jwtDecode<{ role: string }>(token);
+        
+        if (decoded.role) {
+          const formattedRole = decoded.role.charAt(0).toUpperCase() + 
+                              decoded.role.slice(1).toLowerCase();
+          setRole(formattedRole);
+        }
+      }
+    } catch (error) {
+      console.error("Error decoding token:", error);
+      // Giữ giá trị mặc định nếu có lỗi
+      setRole("Dashboard");
+    }
+  }, []);
 
   return (
     <Drawer
@@ -36,9 +60,12 @@ export default function SideMenu({ children }: SideMenuProps) {
           py: 2,
         }}
       >
-        <Typography variant="h6" component="div" fontWeight="bold">
-          Dashboard
-        </Typography>
+        <Stack direction="row" spacing={1} alignItems="center">
+          <AccountCircleIcon color="primary" />
+          <Typography variant="h6" component="div" fontWeight="bold">
+            {role} Panel
+          </Typography>
+        </Stack>
       </Toolbar>
       <Divider />
       <Box
@@ -48,8 +75,8 @@ export default function SideMenu({ children }: SideMenuProps) {
           display: "flex",
           flexDirection: "column",
         }}
-      >      {children}
-
+      >
+        {children}
       </Box>
     </Drawer>
   );

@@ -40,7 +40,6 @@ interface Brand {
   brandName: string;
 }
 
-// Thêm interface cho Category
 interface Category {
   categoryId: number;
   name: string;
@@ -75,6 +74,7 @@ interface AddProductDialogProps {
   onProductAdded: () => void;
 }
 
+
 export default function AddProductDialog({
   open,
   onClose,
@@ -84,8 +84,8 @@ export default function AddProductDialog({
     productName: "",
     description: "",
     price: "",
-    categoryId: "1",
-    brandId: "1",
+    categoryId: 1,
+    brandId: 1,
     urlImage: "",
     quantity: "",
     productionDate: null as Date | null,
@@ -97,7 +97,6 @@ export default function AddProductDialog({
   const [brands, setBrands] = useState<Brand[]>([
     { brandId: 1, brandName: "Default Brand" },
   ]);
-  // Thêm state cho categories
   const [categories, setCategories] = useState<Category[]>([
     { categoryId: 1, name: "Default Category", isActive: true },
   ]);
@@ -127,7 +126,6 @@ export default function AddProductDialog({
     }
   };
 
-  // Sửa lại fetchCategories để set vào state categories
   const fetchCategories = async () => {
     try {
       const response = await axios.get(`${portserver}/category`);
@@ -229,20 +227,33 @@ export default function AddProductDialog({
       if (selectedFile) {
         urlImage = await uploadImage();
       }
+      const token = localStorage.getItem("token");
+      if (!token) {
+        setError("Authentication token not found. Please login again.");
+        setLoading(false);
+        return;
+      }
 
       const payload = {
         productName: productData.productName,
         categoryId: productData.categoryId,
         brandId: productData.brandId,
         description: productData.description || "",
-        price: productData.price,
+        price: parseFloat(productData.price), 
         urlImage: urlImage || "",
         productionDate: productData.productionDate?.toISOString().split("T")[0],
-        expirationDate: productData.expirationDate?.toISOString().split("T")[0],
-        quantity: productData.quantity,
+        expirationDate: productData.expirationDate?.toISOString().split("T")[0], 
+        quantity: parseInt(productData.quantity), 
       };
 
-      await axios.post(`${portserver}/skincare-product/add-product`, payload);
+      console.log("Sending payload to API:", payload);
+
+      await axios.post(`${portserver}/skincare-product/add-product`, payload, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
 
       setSuccess("Product added successfully!");
       setLoading(false);
@@ -263,8 +274,8 @@ export default function AddProductDialog({
       productName: "",
       description: "",
       price: "",
-      categoryId: "1",
-      brandId: "1",
+      categoryId: 1,
+      brandId: 1,
       urlImage: "",
       quantity: "",
       productionDate: null,

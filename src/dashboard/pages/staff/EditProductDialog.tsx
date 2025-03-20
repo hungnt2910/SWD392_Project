@@ -270,6 +270,7 @@ export default function EditProductDialog({
         price: parseFloat(productData.price),
         urlImage: urlImage || "",
         isActive: product.isActive, 
+        quantity: parseInt(productData.quantity)||"",
       };
 
       console.log("Updating product with payload:", payload);
@@ -383,7 +384,6 @@ export default function EditProductDialog({
                     disabled={loading}
                   />
 
-                  {/* Brand dropdown */}
                   <TextField
                     name="brandId"
                     select
@@ -401,7 +401,6 @@ export default function EditProductDialog({
                     ))}
                   </TextField>
 
-                  {/* Category dropdown */}
                   <TextField
                     name="categoryId"
                     select
@@ -440,7 +439,6 @@ export default function EditProductDialog({
                     }}
                   />
 
-                  {/* Read-only stock information */}
                   <TextField
                     name="quantity"
                     label="Current Stock"

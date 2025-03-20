@@ -46,16 +46,14 @@ export default function CreateUserDialog({
   onClose,
   onUserCreated,
 }: CreateUserDialogProps) {
-  // Form state
   const [userData, setUserData] = useState({
     username: "",
     email: "",
     password: "",
     confirmPassword: "",
-    roleId: "2", // Default to User
+    roleId: "2", 
   });
 
-  // State cho validation và UI
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
@@ -63,7 +61,6 @@ export default function CreateUserDialog({
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState<boolean>(false);
 
-  // Xử lý thay đổi input
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setUserData({
@@ -71,7 +68,6 @@ export default function CreateUserDialog({
       [name]: value,
     });
     
-    // Reset lỗi khi user thay đổi giá trị
     if (errors[name]) {
       setErrors({
         ...errors,
@@ -80,7 +76,6 @@ export default function CreateUserDialog({
     }
   };
 
-  // Xử lý thay đổi cho select (role dropdown)
   const handleRoleChange = (e: any) => {
     setUserData({
       ...userData,
@@ -88,7 +83,6 @@ export default function CreateUserDialog({
     });
   };
 
-  // Xử lý toggle hiện/ẩn mật khẩu
   const handleTogglePasswordVisibility = () => {
     setShowPassword(!showPassword);
   };
@@ -97,30 +91,25 @@ export default function CreateUserDialog({
     setShowConfirmPassword(!showConfirmPassword);
   };
 
-  // Validate form
   const validateForm = (): boolean => {
     const validationErrors: Record<string, string> = {};
     
-    // Validate username
     if (!userData.username.trim()) {
       validationErrors.username = "Username is required";
     }
     
-    // Validate email
     if (!userData.email.trim()) {
       validationErrors.email = "Email is required";
     } else if (!isValidEmail(userData.email)) {
       validationErrors.email = "Please enter a valid email address";
     }
     
-    // Validate password
     if (!userData.password) {
       validationErrors.password = "Password is required";
     } else if (userData.password.length < 6) {
       validationErrors.password = "Password must be at least 6 characters";
     }
     
-    // Validate confirm password
     if (!userData.confirmPassword) {
       validationErrors.confirmPassword = "Please confirm your password";
     } else if (userData.password !== userData.confirmPassword) {
@@ -131,15 +120,12 @@ export default function CreateUserDialog({
     return Object.keys(validationErrors).length === 0;
   };
 
-  // Kiểm tra email hợp lệ
   const isValidEmail = (email: string) => {
     const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailPattern.test(email);
   };
 
-  // Xử lý submit form
   const handleSubmit = async () => {
-    // Validate form trước khi submit
     if (!validateForm()) {
       return;
     }
@@ -148,7 +134,6 @@ export default function CreateUserDialog({
     setError(null);
 
     try {
-      // Lấy token từ localStorage
       const token = localStorage.getItem("token");
       
       if (!token) {
@@ -157,15 +142,13 @@ export default function CreateUserDialog({
         return;
       }
       
-      // Chuẩn bị payload
       const payload = {
         email: userData.email,
         username: userData.username,
         password: userData.password,
-        roleId: userData.roleId,
+        roleId: parseInt(userData.roleId),
       };
 
-      // Gọi API tạo user mới
       await axios.post(`${portserver}/admin/createUser`, payload, {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -175,7 +158,6 @@ export default function CreateUserDialog({
       setSuccess("User created successfully!");
       setLoading(false);
       
-      // Thông báo tạo thành công và đóng dialog sau 1.5s
       setTimeout(() => {
         onUserCreated();
         handleClose();
@@ -183,7 +165,6 @@ export default function CreateUserDialog({
     } catch (err: any) {
       console.error("Error creating user:", err);
       
-      // Hiển thị thông báo lỗi từ server nếu có
       if (err.response && err.response.data && err.response.data.message) {
         setError(err.response.data.message);
       } else {
@@ -194,7 +175,6 @@ export default function CreateUserDialog({
     }
   };
 
-  // Đóng dialog và reset form
   const handleClose = () => {
     setUserData({
       username: "",
