@@ -18,12 +18,11 @@ import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import AssessmentIcon from "@mui/icons-material/Assessment";
-import { format, isAfter } from "date-fns";
+import { format, isAfter, parseISO, isWithinInterval } from "date-fns";
 import axios from "axios";
 import { portserver } from "../../../utils/portserver";
 import StatCard from "../../components/StatCard";
 
-// Interface cho dữ liệu từ API
 interface DashboardData {
   totalOrders: number;
   totalRevenue: number;
@@ -36,14 +35,28 @@ interface DashboardData {
     yearMonth: string;
     successfulOrders: string;
   }[];
-  canceledOrdersPerMonth: number;
   totalRevenuePerPeriod: {
     periodMonth: string;
     totalRevenue: number;
   }[];
 }
 
-// Format tiền tệ
+interface OrderDetail {
+  orderDetailId: number;
+  price: number;
+  quantity: number;
+  productName: string;
+}
+
+interface Order {
+  orderId: number;
+  status: string;
+  amount: number;
+  shippingAddress: string;
+  timestamp: string;
+  orderDetails: OrderDetail[];
+}
+
 const formatCurrency = (value: number) => {
   return new Intl.NumberFormat("vi-VN", {
     style: "currency",
@@ -55,18 +68,16 @@ const formatCurrency = (value: number) => {
 
 export default function Dashboard() {
   const theme = useTheme();
-  const [dashboardData, setDashboardData] = useState<DashboardData | null>(
-    null
-  );
-  const [loading, setLoading] = useState(false); // Change to false for initial state
+  const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [filteredOrders, setFilteredOrders] = useState<Order[]>([]);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Date picker states
   const [startDate, setStartDate] = useState<Date | null>(new Date(2024, 0, 1)); // 1 Jan 2024
   const [endDate, setEndDate] = useState<Date | null>(new Date(2025, 11, 31)); // 31 Dec 2025
   const [dateError, setDateError] = useState<string | null>(null);
 
-  // State to trigger API call - initialize with null values
   const [dateRange, setDateRange] = useState<{
     startDate: string | null;
     endDate: string | null;
@@ -94,7 +105,6 @@ export default function Dashboard() {
     }
   };
 
-  // Apply date filter
   const applyDateFilter = () => {
     if (!startDate || !endDate) {
       setDateError("Please select both start and end dates");
@@ -106,7 +116,6 @@ export default function Dashboard() {
       return;
     }
 
-    // Format dates as DD-MM-YYYY for API
     const formattedStartDate = format(startDate, "dd-MM-yyyy");
     const formattedEndDate = format(endDate, "dd-MM-yyyy");
 
@@ -117,7 +126,47 @@ export default function Dashboard() {
   };
 
   useEffect(() => {
-    // Only fetch data if both dates are set
+    const fetchOrdersData = async () => {
+      try {
+        setLoading(true);
+        const token = localStorage.getItem("token");
+
+        if (!token) {
+          setError("Authentication token not found. Please login again.");
+          setLoading(false);
+          return;
+        }
+
+        const response = await axios.get(`${portserver}/orders`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        setOrders(response.data);
+        setError(null);
+      } catch (err) {
+        console.error("Error fetching orders data:", err);
+        setError("Failed to load orders data. Please try again later.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchOrdersData();
+  }, []);
+
+  useEffect(() => {
+    if (orders.length > 0 && startDate && endDate) {
+      const filtered = orders.filter((order) => {
+        const orderDate = parseISO(order.timestamp);
+        return isWithinInterval(orderDate, { start: startDate, end: endDate });
+      });
+      setFilteredOrders(filtered);
+    }
+  }, [orders, startDate, endDate]);
+
+  useEffect(() => {
     if (dateRange.startDate && dateRange.endDate) {
       const fetchDashboardData = async () => {
         try {
@@ -154,14 +203,41 @@ export default function Dashboard() {
     }
   }, [dateRange]);
 
-  // Thêm hàm này vào phần đầu component Dashboard, sau các biến state
+  const getCanceledOrdersCount = (): number => {
+    return filteredOrders.filter(order => order.status === "Cancelled").length;
+  };
+
+  const getTopProducts = (): { productName: string; quantity: number }[] => {
+    const productMap: Record<string, number> = {};
+    
+    const successfulOrders = filteredOrders.filter(order => 
+      order.status !== "Cancelled"
+    );
+    
+    successfulOrders.forEach(order => {
+      order.orderDetails.forEach(detail => {
+        if (productMap[detail.productName]) {
+          productMap[detail.productName] += detail.quantity;
+        } else {
+          productMap[detail.productName] = detail.quantity;
+        }
+      });
+    });
+    
+    const sortedProducts = Object.entries(productMap)
+      .map(([productName, quantity]) => ({ productName, quantity }))
+      .sort((a, b) => b.quantity - a.quantity)
+      .slice(0, 10); 
+    
+    return sortedProducts;
+  };
+
   // Hàm xác định xu hướng doanh thu
   const calculateRevenueTrend = (
     revenueData: { month: string; revenue: number }[]
   ): "up" | "down" | "neutral" => {
     if (revenueData.length < 2) return "neutral";
 
-    // Xu hướng dựa vào 2 giá trị gần nhất
     const lastValue = revenueData[revenueData.length - 1].revenue;
     const previousValue = revenueData[revenueData.length - 2].revenue;
 
@@ -170,7 +246,6 @@ export default function Dashboard() {
     return "neutral";
   };
 
-  // Render the date selector
   const renderDateSelector = () => (
     <Box sx={{ mb: 4 }}>
       <Typography component="h2" variant="h5" sx={{ mb: 2 }}>
@@ -244,7 +319,6 @@ export default function Dashboard() {
     </Box>
   );
 
-  // Display initial state when no date range has been selected yet
   if (!dateRange.startDate || !dateRange.endDate) {
     return (
       <Box sx={{ width: "100%", p: 2, maxWidth: { sm: "100%", md: "1700px" } }}>
@@ -276,7 +350,6 @@ export default function Dashboard() {
     );
   }
 
-  // Show loading spinner when fetching data
   if (loading) {
     return (
       <Box sx={{ width: "100%", p: 2, maxWidth: { sm: "100%", md: "1700px" } }}>
@@ -297,7 +370,6 @@ export default function Dashboard() {
     );
   }
 
-  // Show error message
   if (error) {
     return (
       <Box sx={{ width: "100%", p: 2, maxWidth: { sm: "100%", md: "1700px" } }}>
@@ -309,7 +381,6 @@ export default function Dashboard() {
     );
   }
 
-  // Show message when no data is available
   if (!dashboardData) {
     return (
       <Box sx={{ width: "100%", p: 2, maxWidth: { sm: "100%", md: "1700px" } }}>
@@ -321,32 +392,32 @@ export default function Dashboard() {
     );
   }
 
-  // The rest of the code for displaying dashboard data remains the same
-  // Xử lý an toàn cho các giá trị từ API
   const totalOrders = dashboardData.totalOrders || 0;
   const totalRevenue = dashboardData.totalRevenue || 0;
-  const canceledOrders = dashboardData.canceledOrdersPerMonth || 0;
+  const canceledOrders = getCanceledOrdersCount();
   const topProducts = dashboardData.topProducts || [];
   const successfulOrdersPerMonth = dashboardData.successfulOrdersPerMonth || [];
   const totalRevenuePerPeriod = dashboardData.totalRevenuePerPeriod || [];
 
-  // Tính tổng số đơn hàng (thành công + hủy)
   const totalOrdersAll = totalOrders + canceledOrders;
 
-  // Tính tỷ lệ đơn hàng thành công
   const successRate =
     totalOrdersAll > 0 ? Math.round((totalOrders / totalOrdersAll) * 100) : 0;
 
-  // Chuẩn bị dữ liệu cho biểu đồ thương hiệu bán chạy nhất (lấy top 7)
   const topBrandsData = topProducts.slice(0, 7).map((brand) => ({
     brand: brand.brandName,
-    sold: parseInt(brand.totalSold) || 0, // Thêm || 0 để tránh NaN
+    sold: parseInt(brand.totalSold) || 0,
   }));
 
-  // Đoạn code cho chuẩn bị dữ liệu revenue timeline - thay thế đoạn code revenueData hiện tại
+  const topProductsData = getTopProducts().slice(0, 7).map((product) => ({
+    product: product.productName.length > 20 
+      ? `${product.productName.substring(0, 20)}...` 
+      : product.productName,
+    quantity: product.quantity,
+  }));
+
   const revenueData = [...totalRevenuePerPeriod]
     .sort((a, b) => {
-      // Sắp xếp theo thời gian từ cũ đến mới để biểu đồ hiển thị đúng xu hướng
       if (
         a.periodMonth.includes("-") &&
         a.periodMonth.split("-").length === 3
@@ -370,36 +441,51 @@ export default function Dashboard() {
       revenue: item.totalRevenue || 0,
     }));
 
-  // Chuẩn bị dữ liệu cho biểu đồ đơn hàng thành công/hủy
   const orderStatusData = [
     { id: 0, value: totalOrders, label: "Successful" },
     { id: 1, value: canceledOrders, label: "Canceled" },
   ];
 
-  // Chuẩn bị dữ liệu cho bảng thương hiệu
   const brandColumns: GridColDef[] = [
-    { field: "id", headerName: "ID", width: 70 },
-    { field: "name", headerName: "Brand Name", width: 200 },
+    { field: "id", headerName: "ID", width: 100 },
+    { field: "name", headerName: "Brand Name", width: 210 },
     {
       field: "sold",
       headerName: "Products Sold",
-      width: 180,
-      align: "right",
-      headerAlign: "right",
+      width: 250,
+      align: "center",
+      headerAlign: "center",
     },
   ];
 
   const brandRows = topProducts.map((brand) => ({
     id: brand.brandId,
     name: brand.brandName,
-    sold: parseInt(brand.totalSold) || 0, // Thêm || 0 để tránh NaN
+    sold: parseInt(brand.totalSold) || 0,
+  }));
+
+  const productColumns: GridColDef[] = [
+    { field: "id", headerName: "No.", width: 70 },
+    { field: "name", headerName: "Product Name", flex: 1, minWidth: 200 },
+    {
+      field: "quantity",
+      headerName: "Quantity Sold",
+      width: 120,
+      align: "center",
+      headerAlign: "center",
+    },
+  ];
+
+  const productRows = getTopProducts().map((product, index) => ({
+    id: index + 1,
+    name: product.productName,
+    quantity: product.quantity,
   }));
 
   return (
     <Box sx={{ width: "100%", p: 2, maxWidth: { sm: "100%", md: "1700px" } }}>
       {renderDateSelector()}
 
-      {/* Overview Cards */}
       <Grid container spacing={3} columns={12} sx={{ mb: 4 }}>
         <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
           <StatCard
@@ -421,7 +507,7 @@ export default function Dashboard() {
               successfulOrdersPerMonth[0]?.yearMonth || "Current period"
             }`}
             trend={calculateRevenueTrend(revenueData)}
-            data={revenueData.map((item) => item.revenue / 1000000)} // Dữ liệu theo thời gian thay vì 1 điểm duy nhất
+            data={revenueData.map((item) => item.revenue / 1000000)}
           />
         </Grid>
 
@@ -446,9 +532,7 @@ export default function Dashboard() {
         </Grid>
       </Grid>
 
-      {/* Charts */}
       <Grid container spacing={3} columns={12} sx={{ mb: 4 }}>
-        {/* Top Brands Chart */}
         <Grid size={{ xs: 12, md: 8 }}>
           <Card variant="outlined" sx={{ height: "100%" }}>
             <CardContent>
@@ -491,7 +575,6 @@ export default function Dashboard() {
           </Card>
         </Grid>
 
-        {/* Order Status Chart */}
         <Grid size={{ xs: 12, md: 4 }}>
           <Card variant="outlined" sx={{ height: "100%" }}>
             <CardContent>
@@ -507,7 +590,6 @@ export default function Dashboard() {
                   justifyContent: "center",
                 }}
               >
-                {/* Hiện pie chart chỉ khi có dữ liệu */}
                 {totalOrdersAll > 0 ? (
                   <PieChart
                     series={[
@@ -529,13 +611,13 @@ export default function Dashboard() {
                     ]}
                     height={300}
                     width={300}
-                    margin={{ top: 10, bottom: 80, left: 30, right: 30 }} // Thêm margin để tạo không gian cho legend
+                    margin={{ top: 10, bottom: 80, left: 30, right: 30 }}
                     slotProps={{
                       legend: {
-                        direction: "row", // Đổi thành hướng ngang
-                        position: { vertical: "bottom", horizontal: "middle" }, // Đặt ở giữa phía dưới
-                        padding: { top: 20 }, // Thêm padding để tạo khoảng cách với chart
-                        itemMarkWidth: 10, // Giảm kích thước của marker
+                        direction: "row",
+                        position: { vertical: "bottom", horizontal: "middle" },
+                        padding: { top: 20 },
+                        itemMarkWidth: 10,
                         itemMarkHeight: 10,
                         markGap: 5,
                         itemGap: 15,
@@ -553,8 +635,7 @@ export default function Dashboard() {
         </Grid>
       </Grid>
 
-      {/* Revenue Timeline and Brands Table */}
-      <Grid container spacing={3} columns={12}>
+      <Grid container spacing={3} columns={12} sx={{ mb: 4 }}>
         {/* Revenue Timeline */}
         <Grid size={{ xs: 12, md: 7 }}>
           <Card variant="outlined">
@@ -600,8 +681,51 @@ export default function Dashboard() {
           </Card>
         </Grid>
 
-        {/* Brands Table */}
         <Grid size={{ xs: 12, md: 5 }}>
+          <Card variant="outlined" sx={{ height: "100%" }}>
+            <CardContent>
+              <Typography component="h2" variant="subtitle1" gutterBottom>
+                Top Selling Products
+              </Typography>
+
+              {topProductsData.length > 0 ? (
+                <BarChart
+                  xAxis={[
+                    {
+                      scaleType: "band",
+                      data: topProductsData.map((item) => item.product),
+                      tickLabelStyle: {
+                        angle: 45,
+                        textAnchor: "start",
+                        fontSize: 11,
+                      },
+                    },
+                  ]}
+                  series={[
+                    {
+                      data: topProductsData.map((item) => item.quantity),
+                      label: "Quantity Sold",
+                      color: theme.palette.secondary.main,
+                    },
+                  ]}
+                  height={350}
+                  margin={{ left: 50, right: 20, top: 20, bottom: 70 }}
+                  grid={{ horizontal: true, vertical: false }}
+                />
+              ) : (
+                <Box sx={{ p: 3, textAlign: "center" }}>
+                  <Typography color="text.secondary">
+                    No product data available
+                  </Typography>
+                </Box>
+              )}
+            </CardContent>
+          </Card>
+        </Grid>
+      </Grid>
+
+      <Grid container spacing={3} columns={12}>
+        <Grid size={{ xs: 12, md: 6 }}>
           <Card variant="outlined" sx={{ height: "100%" }}>
             <CardContent>
               <Typography component="h2" variant="subtitle1" gutterBottom>
@@ -631,6 +755,45 @@ export default function Dashboard() {
                   <Box sx={{ p: 3, textAlign: "center" }}>
                     <Typography color="text.secondary">
                       No brand data available
+                    </Typography>
+                  </Box>
+                )}
+              </Box>
+            </CardContent>
+          </Card>
+        </Grid>
+
+        {/* Products Table */}
+        <Grid size={{ xs: 12, md: 6 }}>
+          <Card variant="outlined" sx={{ height: "100%" }}>
+            <CardContent>
+              <Typography component="h2" variant="subtitle1" gutterBottom>
+                Top Products
+              </Typography>
+
+              <Box sx={{ height: 350, width: "100%" }}>
+                {productRows.length > 0 ? (
+                  <DataGrid
+                    rows={productRows}
+                    columns={productColumns}
+                    pageSizeOptions={[5, 10]}
+                    initialState={{
+                      pagination: {
+                        paginationModel: {
+                          pageSize: 5,
+                        },
+                      },
+                      sorting: {
+                        sortModel: [{ field: "quantity", sort: "desc" }],
+                      },
+                    }}
+                    disableRowSelectionOnClick
+                    density="compact"
+                  />
+                ) : (
+                  <Box sx={{ p: 3, textAlign: "center" }}>
+                    <Typography color="text.secondary">
+                      No product data available
                     </Typography>
                   </Box>
                 )}

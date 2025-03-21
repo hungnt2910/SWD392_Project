@@ -19,6 +19,7 @@ import Chip from "@mui/material/Chip";
 import CircularProgress from "@mui/material/CircularProgress";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import CancelIcon from "@mui/icons-material/Cancel";
+import MoneyOffIcon from "@mui/icons-material/MoneyOff";
 import { format } from "date-fns";
 
 export interface OrderDetail {
@@ -43,6 +44,7 @@ interface OrderDetailDialogProps {
   order: Order | null;
   onConfirmOrder?: (orderId: number) => Promise<void>;
   onCancelOrder?: (orderId: number) => Promise<void>;
+  onConfirmRefund?: (orderId: number) => Promise<void>;
   processing?: boolean;
 }
 
@@ -66,15 +68,18 @@ export const formatPrice = (price: number): string => {
 export const getStatusColor = (
   status: string
 ): "success" | "warning" | "info" | "error" | "default" => {
-  switch (status) {
-    case "Completed":
+  switch (status.toLowerCase()) {
+    case "completed":
       return "success";
-    case "Pending":
+    case "pending":
+    case "ready to refund":
       return "warning";
-    case "Shipped":
-    case "Confirmed":
+    case "shipped":
+    case "confirmed":
+    case "paid":
       return "info";
-    case "Cancelled":
+    case "cancelled":
+    case "refunded":
       return "error";
     default:
       return "default";
@@ -91,6 +96,7 @@ const OrderDetailDialog: React.FC<OrderDetailDialogProps> = ({
   order,
   onConfirmOrder,
   onCancelOrder,
+  onConfirmRefund,
   processing = false,
 }) => {
   const [localProcessing, setLocalProcessing] = useState<boolean>(false);
@@ -98,7 +104,8 @@ const OrderDetailDialog: React.FC<OrderDetailDialogProps> = ({
 
   if (!order) return null;
 
-  const isPaid = order.status === "Paid";
+  const isPaid = order.status.toLowerCase() === "paid";
+  const isReadyToRefund = order.status.toLowerCase() === "ready to refund";
 
   const handleConfirm = async () => {
     if (!onConfirmOrder) return;
@@ -123,6 +130,20 @@ const OrderDetailDialog: React.FC<OrderDetailDialogProps> = ({
       onClose();
     } catch (error) {
       console.error("Error cancelling order:", error);
+    } finally {
+      setLocalProcessing(false);
+    }
+  };
+
+  const handleRefund = async () => {
+    if (!onConfirmRefund) return;
+
+    setLocalProcessing(true);
+    try {
+      await onConfirmRefund(order.orderId);
+      onClose();
+    } catch (error) {
+      console.error("Error confirming refund:", error);
     } finally {
       setLocalProcessing(false);
     }
@@ -268,6 +289,18 @@ const OrderDetailDialog: React.FC<OrderDetailDialogProps> = ({
             startIcon={<CancelIcon />}
           >
             Cancel Order
+          </Button>
+        )}
+
+        {isReadyToRefund && onConfirmRefund && (
+          <Button
+            variant="contained"
+            color="success"
+            onClick={handleRefund}
+            disabled={isProcessing}
+            startIcon={<MoneyOffIcon />}
+          >
+            Confirm Refund
           </Button>
         )}
       </DialogActions>

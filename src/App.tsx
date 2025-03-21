@@ -19,6 +19,7 @@ import ManageGoods from "./dashboard/pages/staff/ManageGoods";
 import ManageMembers from "./dashboard/pages/staff/ManageMembers";
 import OrderList from "./dashboard/pages/staff/OrderList";
 import OrderConfirm from "./dashboard/pages/staff/OrderConfirm";
+import OrderRefund from "./dashboard/pages/staff/OrderRefund";
 import ManageReviews from "./dashboard/pages/staff/ManageReviews";
 import ManageBlogs from "./dashboard/pages/staff/ManageBlogs";
 import CreateVoucher from "./dashboard/pages/staff/CreateVoucher";
@@ -77,6 +78,7 @@ function App() {
           <Route path="members" element={<CheckLogin><ManageMembers /></CheckLogin>} />
           <Route path="orders/all" element={<CheckLogin><OrderList /></CheckLogin>} />
           <Route path="orders/confirm" element={<CheckLogin><OrderConfirm /></CheckLogin>} />
+          <Route path="orders/refund" element={<CheckLogin><OrderRefund /></CheckLogin>} />
           <Route path="reviews" element={<CheckLogin><ManageReviews /></CheckLogin>} />
           <Route path="blogs" element={<CheckLogin><ManageBlogs /></CheckLogin>} />
           <Route path="voucher" element={<CheckLogin><CreateVoucher /></CheckLogin>} />
