@@ -28,6 +28,12 @@ import ManageUsers from "./dashboard/pages/admin/ManageUsers";
 import SkincareRoutine from "./page/SkincareRoutine";
 import Order from "./page/Cart/Order";
 import Shipper from './page/Shipper/Shipper'
+import InProgess from "./page/Cart/InProgess";
+import Delivered from "./page/Cart/Delivered";
+import Returns from "./page/Cart/Returns";
+import Shipperlayout from "./page/Shipper/ShipperLayout";
+import ShipperReturns from "./page/Shipper/ShipperReturns";
+import Pending from "./page/Cart/Pending";
 
 function App() {
   const ProtectRoute = ({ children, requireRoles }: { children: JSX.Element, requireRoles?: string[] }) => {
@@ -59,13 +65,22 @@ function App() {
         <Route path="/contact" element={<MainLayout><ContactPage /></MainLayout>} />
         <Route path="/quiz" element={<CheckLogin><ProtectRoute requireRoles={["User"]}><MainLayout><QuizPage /></MainLayout></ProtectRoute></CheckLogin>} />
         <Route path="/searchproduct" element={<ProtectRoute requireRoles={["User", "Admin", ""]}><MainLayout><SearchPage /></MainLayout></ProtectRoute>} />
-        <Route path="/cart" element={<CheckLogin><ProtectRoute requireRoles={["User"]}><MainLayout><CartLayout><CartPage /></CartLayout></MainLayout></ProtectRoute></CheckLogin>} />
-        <Route path="/order" element={<CheckLogin><ProtectRoute requireRoles={["User"]}><MainLayout><CartLayout><Order /></CartLayout></MainLayout></ProtectRoute></CheckLogin>} />
         <Route path="/skincareroutine" element={<CheckLogin><ProtectRoute requireRoles={["User", "Admin"]}><MainLayout><SkincareRoutine /></MainLayout></ProtectRoute></CheckLogin>} />
         <Route path="/" element={<Navigate to={'/home'} />} />
 
+        <Route path="/cart" element={<CheckLogin><ProtectRoute requireRoles={["User"]}><MainLayout><CartLayout><CartPage /></CartLayout></MainLayout></ProtectRoute></CheckLogin>} />
+        <Route path="/orders" element={<CheckLogin><ProtectRoute requireRoles={["User"]}><MainLayout><CartLayout><Order /></CartLayout></MainLayout></ProtectRoute></CheckLogin>} />
+        <Route path="/pending" element={<CheckLogin><ProtectRoute requireRoles={["User"]}><MainLayout><CartLayout><Pending /></CartLayout></MainLayout></ProtectRoute></CheckLogin>} />
+        <Route path="/in-progress" element={<CheckLogin><ProtectRoute requireRoles={["User"]}><MainLayout><CartLayout><InProgess /></CartLayout></MainLayout></ProtectRoute></CheckLogin>} />
+        <Route path="/delivered" element={<CheckLogin><ProtectRoute requireRoles={["User"]}><MainLayout><CartLayout><Delivered /></CartLayout></MainLayout></ProtectRoute></CheckLogin>} />
+        <Route path="/returns" element={<CheckLogin><ProtectRoute requireRoles={["User"]}><MainLayout><CartLayout><Returns /></CartLayout></MainLayout></ProtectRoute></CheckLogin>} />
+
         {/* Shipper */}
-        <Route path="/shipper" element={<CheckLogin><ProtectRoute requireRoles={["Shipper"]}><MainLayout><Shipper /></MainLayout></ProtectRoute></CheckLogin>} />
+        <Route path="/shipper">
+          <Route index element={<Navigate to="delivery" replace />} />
+          <Route path="delivery" element={<CheckLogin><ProtectRoute requireRoles={["Shipper"]}><MainLayout><Shipperlayout><Shipper /></Shipperlayout></MainLayout></ProtectRoute></CheckLogin>} />
+          <Route path="returns" element={<CheckLogin><ProtectRoute requireRoles={["Shipper"]}><MainLayout><Shipperlayout><ShipperReturns /></Shipperlayout></MainLayout></ProtectRoute></CheckLogin>} />
+        </Route>
 
         {/* Staff */}
         <Route path="/staff" element={

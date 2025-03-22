@@ -81,16 +81,20 @@ const Header = () => {
                                     onChange={(e) => setSearch(e.target.value)}
                                     onKeyDown={(e) => e.key === "Enter" && handleSearch()}
                                 />
-                                <IconButton color="inherit" onClick={handleSearch}>
-                                    <SearchIcon />
-                                </IconButton>
-                                <Button
-                                    startIcon={<ShoppingCartIcon />}
-                                    onClick={() => nav("/cart")}
-                                    sx={{ color: "#D81B60", fontWeight: "bold", "&:hover": { color: "#B0003A" } }}
-                                >
-                                    ({cart.reduce((total, item) => total + item.quantity, 0)})
-                                </Button>
+                                {token &&
+                                    <>
+                                        <IconButton color="inherit" onClick={handleSearch}>
+                                            <SearchIcon />
+                                        </IconButton>
+                                        <Button
+                                            startIcon={<ShoppingCartIcon />}
+                                            onClick={() => nav("/cart")}
+                                            sx={{ color: "#D81B60", fontWeight: "bold", "&:hover": { color: "#B0003A" } }}
+                                        >
+                                            ({cart.reduce((total, item) => total + item.quantity, 0)})
+                                        </Button>
+                                    </>
+                                }
                             </>
                         )
                     }

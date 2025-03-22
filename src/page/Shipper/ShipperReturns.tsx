@@ -26,7 +26,7 @@ interface OrderDetail {
     orderDetailId: number;
     price: number;
     quantity: number;
-    productName: string;
+    productName: string
 }
 
 interface Order {
@@ -38,7 +38,7 @@ interface Order {
     orderDetails: OrderDetail[];
 }
 
-const Shipper = () => {
+const ShipperReturns = () => {
     const [orders, setOrders] = useState<Order[]>([]);
     const token = localStorage.getItem("token");
 
@@ -50,7 +50,7 @@ const Shipper = () => {
                     Authorization: `Bearer ${token}`,
                 },
             });
-            const data = res.data.filter((i: any) => i.status === "confirmed");
+            const data = res.data.filter((i: any) => i.status === "ready to refund");
             setOrders(data);
         } catch (error) {
             console.error("Failed to fetch orders", error);
@@ -62,9 +62,9 @@ const Shipper = () => {
     }, []);
 
     const getStatusChip = (status: string) => {
-        let color: "primary" | "default" = "default";
-        if (status.toLowerCase() === "confirmed") {
-            color = "primary";
+        let color: "warning" | "default" = "default";
+        if (status.toLowerCase() === "ready to refund") {
+            color = "warning";
         }
         return (
             <Chip
@@ -76,7 +76,6 @@ const Shipper = () => {
                     px: 1.5,
                     py: 0.5,
                     fontSize: "0.9rem",
-                    backgroundColor: color === "primary" ? "#1976D2" : "#B0BEC5",
                     color: "#fff",
                 }}
             />
@@ -85,7 +84,7 @@ const Shipper = () => {
 
     const updateOrderStatus = async (orderId: number) => {
         try {
-            await axios.put(`${portserver}/orders/deliver/${orderId}`, {}, {
+            await axios.put(`${portserver}/orders/refund/${orderId}`, {}, {
                 headers: {
                     "Content-Type": "application/json",
                     Authorization: `Bearer ${token}`,
@@ -162,7 +161,7 @@ const Shipper = () => {
                                         sx={{ px: 3, py: 1, fontSize: "1rem", fontWeight: "bold", mt: 2 }}
                                         onClick={() => updateOrderStatus(order.orderId)}
                                     >
-                                        Mark as Shipped
+                                        Mark as received
                                     </Button>
                                 </Grid>
                             </Grid>
@@ -174,4 +173,4 @@ const Shipper = () => {
     );
 };
 
-export default Shipper;
+export default ShipperReturns;
