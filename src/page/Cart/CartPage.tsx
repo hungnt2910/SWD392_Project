@@ -1,4 +1,4 @@
-import { Typography, Button, Box, TextField, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Grid, Dialog, DialogActions, DialogTitle, Skeleton } from "@mui/material";
+import { Typography, Button, Box, TextField, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Grid, Dialog, DialogActions, DialogTitle, Skeleton, DialogContent, DialogContentText } from "@mui/material";
 import { useEffect, useState } from "react";
 import { useCart } from "../../hooks/useCart";
 import axios from "axios";
@@ -7,9 +7,10 @@ import { ToastContainer, toast } from 'react-toastify';
 import { jwtDecode } from "jwt-decode";
 import { MdDeleteOutline } from "react-icons/md";
 import { formatMoney } from "../../utils/format";
+import { FaMoneyBillWave, FaQrcode } from "react-icons/fa";
 
 const CartPage = () => {
-    const { cart, updateQuantity, removeProduct } = useCart();
+    const { cart, updateQuantity, removeProduct, setCart } = useCart();
     const totalAmount: number = cart.reduce((total, item) => total + item.quantity * item.price, 0);
     const [receiver, setReceiver] = useState<string>('');
     const [phone, setPhone] = useState<string>('');
@@ -17,6 +18,7 @@ const CartPage = () => {
     const [openDialog, setOpenDialog] = useState(false);
     const [productToRemove, setProductToRemove] = useState<number | null>(null);
     const [isLoading, setIsLoading] = useState(true);
+    // const [openPaymentDialog, setOpenPaymentDialog] = useState(false);
 
     const token = localStorage.getItem('token');
     const decode = token ? jwtDecode<{ userId: number }>(token) : null;
@@ -43,26 +45,15 @@ const CartPage = () => {
         handleDialogClose();
     };
 
-    const payment = async (orderId: number) => {
-        try {
-            const res = await axios.post(`${portserver}/payment/create/${orderId}`);
-            if (res.data.order_url) {
-                window.location.href = res.data.order_url;
-            } else {
-                toast.error("Payment initiation failed.");
-            }
-        } catch (e) {
-            console.error("Payment error:", e);
-            toast.error("Payment request failed.");
-        }
-    };
-
     const handleConfirmCheckout = async () => {
         if (shippingAddress === '' || phone === '' || receiver === '') {
             toast.error("Please enter all fields");
             return;
         }
+        handlePaymentSelection()
+    };
 
+    const handlePaymentSelection = async () => {
         const orderItems = cart.map((item) => ({
             product_id: item.productId,
             quantity: item.quantity,
@@ -70,7 +61,7 @@ const CartPage = () => {
         }));
 
         try {
-            const res = await axios.post(`${portserver}/orders/checkout`, {
+            await axios.post(`${portserver}/orders/checkout`, {
                 user_id: decode?.userId,
                 total_amount: totalAmount,
                 orderItems,
@@ -84,8 +75,11 @@ const CartPage = () => {
                 }
             });
 
-            payment(res.data.orderId);
+            toast.success('Your order is ready to pay')
             localStorage.setItem('cart', JSON.stringify([]));
+            setCart([])
+            setPhone('')
+            setReceiver('')
             setShippingAddress('');
         } catch (e) {
             console.error("Checkout error:", e);
@@ -93,29 +87,42 @@ const CartPage = () => {
         }
     };
 
+
     return (
         <Box px={3} >
             <Dialog
                 open={openDialog}
                 onClose={handleDialogClose}
                 aria-labelledby="confirm-remove-dialog-title"
+                PaperProps={{
+                    sx: {
+                        borderRadius: 3,
+                        padding: 2,
+                        minWidth: 350,
+                        textAlign: "center"
+                    }
+                }}
             >
-                <DialogTitle id="confirm-remove-dialog-title">
-                    {"Are you sure you want to remove this item?"}
+                <DialogTitle id="confirm-remove-dialog-title" sx={{ fontWeight: "bold" }}>
+                    <Typography variant="h6">
+                        Are you sure you want to remove this item?
+                    </Typography>
                 </DialogTitle>
-                <DialogActions>
-                    <Button onClick={handleDialogClose} color="secondary">
+
+                <DialogActions sx={{ justifyContent: "center", paddingBottom: 2 }}>
+                    <Button onClick={handleDialogClose} sx={{ color: "black", backgroundColor: "#ccc", "&:hover": { backgroundColor: "#bbb" } }}>
                         Cancel
                     </Button>
-                    <Button onClick={handleConfirmRemove} color="primary" autoFocus>
+                    <Button onClick={handleConfirmRemove} sx={{ backgroundColor: "#D81B60", color: "white", fontWeight: "bold", "&:hover": { backgroundColor: "#B0003A" } }}>
                         Confirm
                     </Button>
                 </DialogActions>
             </Dialog>
 
             <ToastContainer />
+
             <Typography variant="h4" gutterBottom sx={{ fontWeight: "bold" }}>
-                Cart
+                🛒 Cart
             </Typography>
             <Grid container spacing={4}>
                 <Grid item xs={12} md={8}>

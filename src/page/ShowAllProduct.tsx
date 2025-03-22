@@ -1,4 +1,4 @@
-import { Container, Typography, Button, Card, CardMedia, CardContent, Pagination } from "@mui/material";
+import { Container, Typography, Button, Card, CardMedia, CardContent, Pagination, Chip } from "@mui/material";
 import Grid from "@mui/material/Grid";
 import axios from "axios";
 import { useEffect, useState } from "react";
@@ -12,6 +12,7 @@ import { formatMoney } from "../utils/format";
 function ShowAllProduct() {
     const [products, setProducts] = useState<Product[]>([]);
     const [brand, setBrand] = useState<Brand[]>([]);
+    const [categoty, setCategory] = useState<{ name: String }[]>([])
     const nav = useNavigate();
     const { addProduct } = useCart()
 
@@ -63,23 +64,21 @@ function ShowAllProduct() {
 
     return (
         <Container>
-            <Box sx={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'start', mb: 2 }}>
+            <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1, justifyContent: "center", mb: 2 }}>
                 {brand.map((item) => (
-                    <Button
-                        variant="outlined"
+                    <Chip
                         key={item.brandId}
+                        label={item.brandName}
+                        variant="outlined"
                         sx={{
-                            mr: 1,
-                            my: 1,
-                            borderRadius: "8px",
+                            borderRadius: "16px",
                             color: "#D81B60",
                             borderColor: "#F8BBD0",
-                            "&:hover": { backgroundColor: "#F8BBD0", color: "white", borderColor: "#D81B60" }
+                            "&:hover": { borderColor: "#D81B60" },
+                            cursor: "pointer",
                         }}
                         onClick={() => getProByBrand({ brandname: item.brandName })}
-                    >
-                        {item.brandName}
-                    </Button>
+                    />
                 ))}
             </Box>
 
