@@ -66,6 +66,7 @@ const OrderList: React.FC = () => {
     setSelectedOrder(order);
     setDetailDialog(true);
   };
+
   const handleConfirmRefund = async (orderId: number) => {
     try {
       setProcessing(true);
@@ -92,11 +93,11 @@ const OrderList: React.FC = () => {
         prevOrders.filter((order) => order.orderId !== orderId)
       );
 
-      toast.success(`Order #${orderId} has been refunded successfully!`);
+      toast.success(`Order #${orderId} has been marked as ready to refund!`);
       setDetailDialog(false);
     } catch (err) {
       console.error("Error confirming refund:", err);
-      toast.error("Failed to process refund. Please try again.");
+      toast.error("Failed to process refund request. Please try again.");
       throw err;
     } finally {
       setProcessing(false);
@@ -322,6 +323,7 @@ const OrderList: React.FC = () => {
         order={selectedOrder}
         onConfirmOrder={handleConfirmOrder} 
         onConfirmRefund={handleConfirmRefund}
+
         // onCancelOrder={handleCancelOrder} 
       />
     </Box>

@@ -80,6 +80,7 @@ export const getStatusColor = (
       return "info";
     case "cancelled":
     case "refunded":
+    case "returned": 
       return "error";
     default:
       return "default";
@@ -106,6 +107,7 @@ const OrderDetailDialog: React.FC<OrderDetailDialogProps> = ({
 
   const isPaid = order.status.toLowerCase() === "paid";
   const isReadyToRefund = order.status.toLowerCase() === "ready to refund";
+  const isReturned = order.status.toLowerCase() === "returned"; 
 
   const handleConfirm = async () => {
     if (!onConfirmOrder) return;
@@ -301,6 +303,18 @@ const OrderDetailDialog: React.FC<OrderDetailDialogProps> = ({
             startIcon={<MoneyOffIcon />}
           >
             Confirm Refund
+          </Button>
+        )}
+
+        {isReturned && onConfirmRefund && (
+          <Button
+            variant="contained"
+            color="success"
+            onClick={handleRefund}
+            disabled={isProcessing}
+            startIcon={<CheckCircleIcon />}
+          >
+            Process Refund
           </Button>
         )}
       </DialogActions>

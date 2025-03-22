@@ -30,7 +30,7 @@ const OrderRefund: React.FC = () => {
   const [detailDialog, setDetailDialog] = useState<boolean>(false);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
 
-  const fetchRefundOrders = async () => {
+  const fetchReturnedOrders = async () => {
     try {
       setLoading(true);
 
@@ -48,11 +48,11 @@ const OrderRefund: React.FC = () => {
         },
       });
 
-      const refundOrders = response.data.filter(
-        (order: Order) => order.status === "ready to refund"
+      const returnedOrders = response.data.filter(
+        (order: Order) => order.status === "returned"
       );
 
-      setOrders(refundOrders);
+      setOrders(returnedOrders);
       setError(null);
     } catch (err) {
       console.error("Error fetching orders:", err);
@@ -63,7 +63,7 @@ const OrderRefund: React.FC = () => {
   };
 
   useEffect(() => {
-    fetchRefundOrders();
+    fetchReturnedOrders();
   }, []);
 
   const handleViewOrder = (order: Order) => {
@@ -97,11 +97,11 @@ const OrderRefund: React.FC = () => {
         prevOrders.filter((order) => order.orderId !== orderId)
       );
 
-      toast.success(`Order #${orderId} has been refunded successfully!`);
+      toast.success(`Order #${orderId} has been marked as ready to refund!`);
       setDetailDialog(false);
     } catch (err) {
       console.error("Error confirming refund:", err);
-      toast.error("Failed to process refund. Please try again.");
+      toast.error("Failed to process refund request. Please try again.");
       throw err;
     } finally {
       setProcessing(false);
@@ -150,7 +150,7 @@ const OrderRefund: React.FC = () => {
       minWidth: 120,
       headerAlign: "center",
       align: "center",
-      renderCell: () => <Chip label="Ready to Refund" color="warning" size="small" />,
+      renderCell: () => <Chip label="Returned" color="error" size="small" />,
     },
     {
       field: "actions",
@@ -188,7 +188,7 @@ const OrderRefund: React.FC = () => {
               </IconButton>
             </Tooltip>
 
-            <Tooltip title="Confirm Refund">
+            <Tooltip title="Process Refund">
               <IconButton
                 color="success"
                 onClick={() => handleConfirmRefund(params.row.orderId)}
@@ -224,7 +224,7 @@ const OrderRefund: React.FC = () => {
       <ToastContainer position="top-right" autoClose={3000} />
 
       <Typography variant="h5" component="h2" sx={{ mb: 2 }}>
-        Refund Requests
+        Return Requests
       </Typography>
 
       {error && (
@@ -234,7 +234,7 @@ const OrderRefund: React.FC = () => {
       )}
 
       {orders.length === 0 && !loading && !error ? (
-        <Alert severity="info">No pending refund requests.</Alert>
+        <Alert severity="info">No pending return requests.</Alert>
       ) : (
         <Box
           sx={{

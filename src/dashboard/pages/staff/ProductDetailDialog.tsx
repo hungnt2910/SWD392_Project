@@ -7,7 +7,20 @@ import DialogContent from "@mui/material/DialogContent";
 import DialogTitle from "@mui/material/DialogTitle";
 import Slide from "@mui/material/Slide";
 import { TransitionProps } from "@mui/material/transitions";
-import { Box, Grid, Typography, Chip, Divider } from "@mui/material";
+import {
+  Box,
+  Grid,
+  Typography,
+  Chip,
+  Divider,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+} from "@mui/material";
 
 interface Category {
   categoryId: number;
@@ -25,6 +38,13 @@ interface Brand {
   isActive: boolean;
 }
 
+interface ProductDetail {
+  id: number;
+  productionDate: string;
+  expirationDate: string;
+  quantity: number;
+}
+
 interface Product {
   productId: number;
   productName: string;
@@ -38,6 +58,7 @@ interface Product {
   brand: Brand;
   brandName: string;
   categoryName: string;
+  productDetails?: ProductDetail[]; 
 }
 
 const Transition = forwardRef<unknown, TransitionProps>(function Transition(
@@ -83,7 +104,11 @@ const ProductDetailDialog: React.FC<ProductDetailDialogProps> = ({
     }
   };
 
-  // eslint-disable-next-line react-hooks/rules-of-hooks
+  const calculateTotalQuantity = (details?: ProductDetail[]) => {
+    if (!details || details.length === 0) return 0;
+    return details.reduce((sum, detail) => sum + detail.quantity, 0);
+  };
+
   const dialogContent = React.useMemo(
     () => (
       <>
@@ -150,7 +175,6 @@ const ProductDetailDialog: React.FC<ProductDetailDialogProps> = ({
                     {product.brandName ||
                       (product.brand ? product.brand.brandName : "N/A")}
                   </Typography>
-
                 </Box>
               </Grid>
 
@@ -231,6 +255,57 @@ const ProductDetailDialog: React.FC<ProductDetailDialogProps> = ({
                   {product.description || "No description available"}
                 </Typography>
               </Grid>
+
+              {product.productDetails && product.productDetails.length > 0 && (
+                <Grid item xs={12}>
+                  <Divider sx={{ my: 1 }} />
+                  <Typography
+                    variant="subtitle2"
+                    color="text.secondary"
+                    sx={{ mt: 1, mb: 1 }}
+                  >
+                    Inventory Details
+                  </Typography>
+                  <TableContainer component={Paper} variant="outlined">
+                    <Table size="small">
+                      <TableHead>
+                        <TableRow>
+                          <TableCell>ID</TableCell>
+                          <TableCell>Production Date</TableCell>
+                          <TableCell>Expiration Date</TableCell>
+                          <TableCell align="right">Quantity</TableCell>
+                        </TableRow>
+                      </TableHead>
+                      <TableBody>
+                        {product.productDetails.map((detail) => (
+                          <TableRow key={detail.id}>
+                            <TableCell>{detail.id}</TableCell>
+                            <TableCell>
+                              {formatDate(detail.productionDate)}
+                            </TableCell>
+                            <TableCell>
+                              {formatDate(detail.expirationDate)}
+                            </TableCell>
+                            <TableCell align="right">
+                              {detail.quantity}
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                        <TableRow>
+                          <TableCell colSpan={3} align="right">
+                            <strong>Total:</strong>
+                          </TableCell>
+                          <TableCell align="right">
+                            <strong>
+                              {calculateTotalQuantity(product.productDetails)}
+                            </strong>
+                          </TableCell>
+                        </TableRow>
+                      </TableBody>
+                    </Table>
+                  </TableContainer>
+                </Grid>
+              )}
             </Grid>
           </Box>
         </DialogContent>

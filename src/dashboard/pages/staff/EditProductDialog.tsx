@@ -16,11 +16,20 @@ import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import { styled } from "@mui/material/styles";
-//import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import MenuItem from "@mui/material/MenuItem";
+import AddIcon from "@mui/icons-material/Add";
+import Table from "@mui/material/Table";
+import TableBody from "@mui/material/TableBody";
+import TableCell from "@mui/material/TableCell";
+import TableContainer from "@mui/material/TableContainer";
+import TableHead from "@mui/material/TableHead";
+import TableRow from "@mui/material/TableRow";
+import Paper from "@mui/material/Paper";
 import axios from "axios";
+import { format } from "date-fns";
 import { portserver } from "../../../utils/portserver";
 
 const VisuallyHiddenInput = styled("input")({
@@ -51,6 +60,13 @@ interface Brand {
   isActive: boolean;
 }
 
+interface ProductDetail {
+  id: number;
+  productionDate: string;
+  expirationDate: string;
+  quantity: number;
+}
+
 interface Product {
   productId: number;
   productName: string;
@@ -64,6 +80,7 @@ interface Product {
   brand: Brand;
   brandName: string;
   categoryName: string;
+  productDetails?: ProductDetail[];
 }
 
 interface TabPanelProps {
@@ -111,14 +128,23 @@ export default function EditProductDialog({
     quantity: "",
   });
 
+  const [stockFormData, setStockFormData] = useState({
+    quantity: "",
+    productionDate: null as Date | null,
+    expirationDate: null as Date | null,
+  });
+
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [brands, setBrands] = useState<Brand[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [loadingProduct, setLoadingProduct] = useState<boolean>(false);
+  const [addingStock, setAddingStock] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const [stockError, setStockError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [stockSuccess, setStockSuccess] = useState<string | null>(null);
   const [tabValue, setTabValue] = useState(0);
   const [product, setProduct] = useState<Product | null>(null);
 
@@ -198,6 +224,18 @@ export default function EditProductDialog({
     }
   };
 
+  const handleStockChange = (
+    e: React.ChangeEvent<HTMLInputElement | { name?: string; value: unknown }>
+  ) => {
+    const { name, value } = e.target;
+    if (name) {
+      setStockFormData({
+        ...stockFormData,
+        [name]: value,
+      });
+    }
+  };
+
   const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files[0]) {
       const file = event.target.files[0];
@@ -223,6 +261,87 @@ export default function EditProductDialog({
     } catch (error) {
       console.error("Error uploading image:", error);
       return productData.urlImage;
+    }
+  };
+
+  const handleAddStock = async () => {
+    if (!product || !productId) return;
+
+    if (
+      !stockFormData.quantity ||
+      isNaN(Number(stockFormData.quantity)) ||
+      Number(stockFormData.quantity) <= 0
+    ) {
+      setStockError("Valid quantity is required");
+      return;
+    }
+
+    if (!stockFormData.productionDate) {
+      setStockError("Production date is required");
+      return;
+    }
+
+    if (!stockFormData.expirationDate) {
+      setStockError("Expiration date is required");
+      return;
+    }
+
+    if (stockFormData.productionDate >= stockFormData.expirationDate) {
+      setStockError("Production date must be before expiration date");
+      return;
+    }
+
+    setAddingStock(true);
+    setStockError(null);
+
+    try {
+      const token = localStorage.getItem("token");
+
+      if (!token) {
+        setStockError("Authentication token not found. Please login again.");
+        setAddingStock(false);
+        return;
+      }
+
+      const payload = {
+        productName: productData.productName,
+        categoryId: parseInt(productData.categoryId),
+        brandId: parseInt(productData.brandId),
+        price: parseFloat(productData.price),
+        productionDate: stockFormData.productionDate
+          ?.toISOString()
+          .split("T")[0],
+        expirationDate: stockFormData.expirationDate
+          ?.toISOString()
+          .split("T")[0],
+        quantity: parseInt(stockFormData.quantity),
+      };
+
+      console.log("Adding new stock with payload:", payload);
+
+      await axios.post(`${portserver}/skincare-product/add-product`, payload, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      setStockSuccess("Stock added successfully!");
+
+      // Reset form
+      setStockFormData({
+        quantity: "",
+        productionDate: null,
+        expirationDate: null,
+      });
+
+      // Refresh product details to show updated stock
+      fetchProductDetails(productId);
+    } catch (err) {
+      console.error("Error adding stock:", err);
+      setStockError("Failed to add stock. Please try again.");
+    } finally {
+      setAddingStock(false);
     }
   };
 
@@ -269,13 +388,15 @@ export default function EditProductDialog({
         description: productData.description || "",
         price: parseFloat(productData.price),
         urlImage: urlImage || "",
-        isActive: product.isActive, 
-        quantity: parseInt(productData.quantity)||"",
+        isActive: product.isActive,
       };
 
       console.log("Updating product with payload:", payload);
 
-      await axios.put(`${portserver}/skincare-product/update/${productId}`, payload);
+      await axios.put(
+        `${portserver}/skincare-product/update/${productId}`,
+        payload
+      );
 
       setSuccess("Product updated successfully!");
 
@@ -301,26 +422,51 @@ export default function EditProductDialog({
       urlImage: "",
       quantity: "",
     });
+    setStockFormData({
+      quantity: "",
+      productionDate: null,
+      expirationDate: null,
+    });
     setSelectedFile(null);
     setImagePreview(null);
     setError(null);
     setSuccess(null);
+    setStockError(null);
+    setStockSuccess(null);
     setTabValue(0);
     setProduct(null);
     onClose();
   };
 
+  const formatDate = (dateString: string) => {
+    if (!dateString) return "N/A";
+
+    try {
+      const date = new Date(dateString);
+      return format(date, "dd MMM yyyy");
+    } catch {
+      return "N/A";
+    }
+  };
+
+  const calculateTotalQuantity = (details?: ProductDetail[]) => {
+    if (!details || details.length === 0) return 0;
+    return details.reduce((sum, detail) => sum + detail.quantity, 0);
+  };
+
   return (
     <Dialog
       open={open}
-      onClose={loading || loadingProduct ? undefined : handleClose}
+      onClose={
+        loading || loadingProduct || addingStock ? undefined : handleClose
+      }
       maxWidth="md"
       fullWidth={false}
       PaperProps={{
         sx: {
           borderRadius: 2,
-          width: "600px",
-          maxHeight: "80vh",
+          width: "650px",
+          maxHeight: "90vh",
         },
       }}
     >
@@ -358,6 +504,7 @@ export default function EditProductDialog({
               <Tabs value={tabValue} onChange={handleTabChange}>
                 <Tab label="Basic Info" />
                 <Tab label="Image" />
+                <Tab label="Stocking" />
               </Tabs>
             </Box>
 
@@ -444,10 +591,8 @@ export default function EditProductDialog({
                     label="Current Stock"
                     value={productData.quantity}
                     fullWidth
-                    required
-                    onChange={handleChange}
-                    disabled={loading}
                     InputProps={{
+                      readOnly: true,
                       startAdornment: (
                         <InputAdornment position="start">Units</InputAdornment>
                       ),
@@ -531,6 +676,155 @@ export default function EditProductDialog({
                 )}
               </Box>
             </TabPanel>
+
+            <TabPanel value={tabValue} index={2}>
+              <Box sx={{ mb: 3 }}>
+                <Typography
+                  variant="subtitle1"
+                  gutterBottom
+                  fontWeight="medium"
+                >
+                  Add New Stock
+                </Typography>
+
+                {stockError && (
+                  <Alert severity="error" sx={{ mb: 2 }}>
+                    {stockError}
+                  </Alert>
+                )}
+
+                {stockSuccess && (
+                  <Alert severity="success" sx={{ mb: 2 }}>
+                    {stockSuccess}
+                  </Alert>
+                )}
+
+                <LocalizationProvider dateAdapter={AdapterDateFns}>
+                  <Stack spacing={2} sx={{ mb: 2 }}>
+                    <TextField
+                      name="quantity"
+                      label="Quantity"
+                      type="number"
+                      fullWidth
+                      required
+                      value={stockFormData.quantity}
+                      onChange={handleStockChange}
+                      disabled={addingStock}
+                      inputProps={{ min: 1 }}
+                    />
+
+                    <DatePicker
+                      label="Production Date *"
+                      value={stockFormData.productionDate}
+                      onChange={(newValue) => {
+                        setStockFormData({
+                          ...stockFormData,
+                          productionDate: newValue,
+                        });
+                      }}
+                      disabled={addingStock}
+                      slotProps={{
+                        textField: {
+                          fullWidth: true,
+                          required: true,
+                        },
+                      }}
+                    />
+
+                    <DatePicker
+                      label="Expiration Date *"
+                      value={stockFormData.expirationDate}
+                      onChange={(newValue) => {
+                        setStockFormData({
+                          ...stockFormData,
+                          expirationDate: newValue,
+                        });
+                      }}
+                      disabled={addingStock}
+                      slotProps={{
+                        textField: {
+                          fullWidth: true,
+                          required: true,
+                        },
+                      }}
+                    />
+
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      startIcon={
+                        addingStock ? (
+                          <CircularProgress size={20} />
+                        ) : (
+                          <AddIcon />
+                        )
+                      }
+                      onClick={handleAddStock}
+                      disabled={addingStock}
+                      sx={{ alignSelf: "flex-start" }}
+                    >
+                      {addingStock ? "Adding..." : "Add Stock"}
+                    </Button>
+                  </Stack>
+                </LocalizationProvider>
+              </Box>
+
+              <Box sx={{ mt: 4 }}>
+                <Typography
+                  variant="subtitle1"
+                  gutterBottom
+                  fontWeight="medium"
+                >
+                  Current Inventory
+                </Typography>
+
+                {product?.productDetails &&
+                product.productDetails.length > 0 ? (
+                  <TableContainer component={Paper} variant="outlined">
+                    <Table size="small">
+                      <TableHead>
+                        <TableRow sx={{ backgroundColor: "action.hover" }}>
+                          <TableCell>ID</TableCell>
+                          <TableCell>Production Date</TableCell>
+                          <TableCell>Expiration Date</TableCell>
+                          <TableCell align="right">Quantity</TableCell>
+                        </TableRow>
+                      </TableHead>
+                      <TableBody>
+                        {product.productDetails.map((detail) => (
+                          <TableRow key={detail.id}>
+                            <TableCell>{detail.id}</TableCell>
+                            <TableCell>
+                              {formatDate(detail.productionDate)}
+                            </TableCell>
+                            <TableCell>
+                              {formatDate(detail.expirationDate)}
+                            </TableCell>
+                            <TableCell align="right">
+                              {detail.quantity}
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                        <TableRow>
+                          <TableCell colSpan={3} align="right">
+                            <strong>Total:</strong>
+                          </TableCell>
+                          <TableCell align="right">
+                            <strong>
+                              {calculateTotalQuantity(product.productDetails)}
+                            </strong>
+                          </TableCell>
+                        </TableRow>
+                      </TableBody>
+                    </Table>
+                  </TableContainer>
+                ) : (
+                  <Typography variant="body2" color="text.secondary">
+                    No inventory details available
+                  </Typography>
+                )}
+              </Box>
+            </TabPanel>
           </>
         )}
       </DialogContent>
@@ -539,14 +833,14 @@ export default function EditProductDialog({
         <Button
           variant="outlined"
           onClick={handleClose}
-          disabled={loading || loadingProduct}
+          disabled={loading || loadingProduct || addingStock}
         >
           Cancel
         </Button>
         <Button
           variant="contained"
           onClick={handleSubmit}
-          disabled={loading || loadingProduct}
+          disabled={loading || loadingProduct || addingStock || tabValue === 2}
           startIcon={loading && <CircularProgress size={20} />}
         >
           {loading ? "Saving Changes..." : "Save Changes"}
