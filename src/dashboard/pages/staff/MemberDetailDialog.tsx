@@ -77,9 +77,50 @@ const MemberDetailDialog: React.FC<MemberDetailDialogProps> = ({
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [processing, setProcessing] = useState<boolean>(false);
   
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [orderDetailOpen, setOrderDetailOpen] = useState(false);
+
+    const handleConfirmRefund = async (orderId: number) => {
+      try {
+        setProcessing(true);
+    
+        const token = localStorage.getItem("token");
+    
+        if (!token) {
+          toast.error("Authentication token not found. Please login again.");
+          setProcessing(false);
+          return;
+        }
+    
+        await axios.put(
+          `${portserver}/orders/confirmReturn/${orderId}`,
+          {},
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+    
+        setOrders((prevOrders) =>
+          prevOrders.map((order) =>
+            order.orderId === orderId
+              ? { ...order, status: "ready to refund" }
+              : order
+          )
+        );
+    
+        toast.success(`Order #${orderId} has been marked as ready to refund!`);
+      } catch (err) {
+        console.error("Error confirming refund:", err);
+        toast.error("Failed to process refund request. Please try again.");
+        throw err;
+      } finally {
+        setProcessing(false);
+      }
+    };
   const handleConfirmOrder = async (orderId: number) => {
     try {
       const token = localStorage.getItem("token");
@@ -355,6 +396,8 @@ const MemberDetailDialog: React.FC<MemberDetailDialogProps> = ({
           onClose={() => setOrderDetailOpen(false)}
           order={selectedOrder}
           onConfirmOrder={handleConfirmOrder}
+          onConfirmRefund={handleConfirmRefund}
+
 
         />
       )}

@@ -31,6 +31,7 @@ export interface OrderDetail {
 
 export interface Order {
   orderId: number;
+  username: string;
   status: string;
   amount: number;
   shippingAddress: string;
@@ -106,7 +107,6 @@ const OrderDetailDialog: React.FC<OrderDetailDialogProps> = ({
   if (!order) return null;
 
   const isPaid = order.status.toLowerCase() === "paid";
-  const isReadyToRefund = order.status.toLowerCase() === "ready to refund";
   const isReturned = order.status.toLowerCase() === "returned"; 
 
   const handleConfirm = async () => {
@@ -294,17 +294,7 @@ const OrderDetailDialog: React.FC<OrderDetailDialogProps> = ({
           </Button>
         )}
 
-        {isReadyToRefund && onConfirmRefund && (
-          <Button
-            variant="contained"
-            color="success"
-            onClick={handleRefund}
-            disabled={isProcessing}
-            startIcon={<MoneyOffIcon />}
-          >
-            Confirm Refund
-          </Button>
-        )}
+
 
         {isReturned && onConfirmRefund && (
           <Button

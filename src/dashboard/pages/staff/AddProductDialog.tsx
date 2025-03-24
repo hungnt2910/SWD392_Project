@@ -74,7 +74,6 @@ interface AddProductDialogProps {
   onProductAdded: () => void;
 }
 
-
 export default function AddProductDialog({
   open,
   onClose,
@@ -130,7 +129,7 @@ export default function AddProductDialog({
     try {
       const response = await axios.get(`${portserver}/category`);
       console.log("Categories fetched:", response.data);
-      setCategories(response.data); // Set categories đúng đắn
+      setCategories(response.data);
     } catch (err) {
       console.error("Error fetching categories:", err);
       setCategories([
@@ -161,22 +160,6 @@ export default function AddProductDialog({
         setImagePreview(reader.result as string);
       };
       reader.readAsDataURL(file);
-    }
-  };
-
-  const uploadImage = async (): Promise<string> => {
-    if (!selectedFile) return "";
-
-    try {
-      const formData = new FormData();
-      formData.append("image", selectedFile);
-
-      //************image upload API endpoint*********
-
-      return URL.createObjectURL(selectedFile);
-    } catch (error) {
-      console.error("Error uploading image:", error);
-      return "";
     }
   };
 
@@ -223,10 +206,6 @@ export default function AddProductDialog({
     setError(null);
 
     try {
-      let urlImage = "";
-      if (selectedFile) {
-        urlImage = await uploadImage();
-      }
       const token = localStorage.getItem("token");
       if (!token) {
         setError("Authentication token not found. Please login again.");
@@ -234,16 +213,19 @@ export default function AddProductDialog({
         return;
       }
 
+      const fixedImageUrl =
+        "https://www.guardian.com.vn/media/catalog/product/cache/30b2b44eba57cd45fd3ef9287600968e/3/0/3024391_jmlxr3jmjjvendjl.jpg";
+
       const payload = {
         productName: productData.productName,
         categoryId: productData.categoryId,
         brandId: productData.brandId,
         description: productData.description || "",
-        price: parseFloat(productData.price), 
-        urlImage: urlImage || "",
+        price: parseFloat(productData.price),
+        urlImage: fixedImageUrl, // Luôn sử dụng URL ảnh cố định
         productionDate: productData.productionDate?.toISOString().split("T")[0],
-        expirationDate: productData.expirationDate?.toISOString().split("T")[0], 
-        quantity: parseInt(productData.quantity), 
+        expirationDate: productData.expirationDate?.toISOString().split("T")[0],
+        quantity: parseInt(productData.quantity),
       };
 
       console.log("Sending payload to API:", payload);
@@ -346,7 +328,6 @@ export default function AddProductDialog({
                 label="Description"
                 fullWidth
                 multiline
-                rows={2}
                 value={productData.description}
                 onChange={handleChange}
               />

@@ -49,7 +49,7 @@ const OrderRefund: React.FC = () => {
       });
 
       const returnedOrders = response.data.filter(
-        (order: Order) => order.status === "returned"
+        (order: Order) => order.status === "returned" || order.status === "Returned"
       );
 
       setOrders(returnedOrders);
@@ -84,7 +84,7 @@ const OrderRefund: React.FC = () => {
       }
 
       await axios.put(
-        `${portserver}/orders/refund/${orderId}`,
+        `${portserver}/orders/confirmReturn/${orderId}`,
         {},
         {
           headers: {
@@ -116,6 +116,12 @@ const OrderRefund: React.FC = () => {
       minWidth: 90,
       headerAlign: "center",
       align: "center",
+    },
+    {
+      field: "username",
+      headerName: "Customer",
+      flex: 1,
+      minWidth: 150,
     },
     {
       field: "shippingAddress",

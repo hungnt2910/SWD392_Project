@@ -50,7 +50,7 @@ const OrderConfirm: React.FC = () => {
       });
 
       const paidOrders = response.data.filter(
-        (order: Order) => order.status === "Paid"
+        (order: Order) => order.status === "Paid" || order.status === "paid"
       );
 
       setOrders(paidOrders);
@@ -156,6 +156,12 @@ const OrderConfirm: React.FC = () => {
       align: "center",
     },
     {
+      field: "username",
+      headerName: "Customer",
+      flex: 1,
+      minWidth: 150,
+    },
+    {
       field: "shippingAddress",
       headerName: "Shipping Address",
       flex: 1.5,
@@ -236,7 +242,7 @@ const OrderConfirm: React.FC = () => {
                 <CheckCircleIcon fontSize="small" />
               </IconButton>
             </Tooltip>
-{/* 
+            {/* 
             <Tooltip title="Cancel Order">
               <IconButton
                 color="error"

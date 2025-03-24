@@ -70,17 +70,17 @@ const OrderList: React.FC = () => {
   const handleConfirmRefund = async (orderId: number) => {
     try {
       setProcessing(true);
-
+  
       const token = localStorage.getItem("token");
-
+  
       if (!token) {
         toast.error("Authentication token not found. Please login again.");
         setProcessing(false);
         return;
       }
-
+  
       await axios.put(
-        `${portserver}/orders/refund/${orderId}`,
+        `${portserver}/orders/confirmReturn/${orderId}`,
         {},
         {
           headers: {
@@ -88,11 +88,15 @@ const OrderList: React.FC = () => {
           },
         }
       );
-
+  
       setOrders((prevOrders) =>
-        prevOrders.filter((order) => order.orderId !== orderId)
+        prevOrders.map((order) =>
+          order.orderId === orderId
+            ? { ...order, status: "ready to refund" }
+            : order
+        )
       );
-
+  
       toast.success(`Order #${orderId} has been marked as ready to refund!`);
       setDetailDialog(false);
     } catch (err) {
@@ -103,6 +107,7 @@ const OrderList: React.FC = () => {
       setProcessing(false);
     }
   };
+
   const handleConfirmOrder = async (orderId: number) => {
     try {
       const token = localStorage.getItem("token");
@@ -136,40 +141,6 @@ const OrderList: React.FC = () => {
     }
   };
 
-  // const handleCancelOrder = async (orderId: number) => {
-  //   try {
-  //     const token = localStorage.getItem("token");
-
-  //     if (!token) {
-  //       toast.error("Authentication token not found. Please login again.");
-  //       return;
-  //     }
-
-  //     await axios.put(
-  //       `${portserver}/orders/cancel/${orderId}`,
-  //       {},
-  //       {
-  //         headers: {
-  //           Authorization: `Bearer ${token}`,
-  //         },
-  //       }
-  //     );
-
-  //     setOrders(
-  //       orders.map((order) =>
-  //         order.orderId === orderId ? { ...order, status: "Cancelled" } : order
-  //       )
-  //     );
-
-  //     toast.info(`Order #${orderId} has been cancelled.`);
-  //   } catch (err) {
-  //     console.error("Error cancelling order:", err);
-  //     toast.error("Failed to cancel order. Please try again.");
-  //     throw err;
-  //   }
-  // };
-
-
   const columns: GridColDef[] = [
     {
       field: "orderId",
@@ -178,6 +149,12 @@ const OrderList: React.FC = () => {
       minWidth: 90,
       headerAlign: "center",
       align: "center",
+    },
+    {
+      field: "username",
+      headerName: "Customer",
+      flex: 1,
+      minWidth: 150,
     },
     {
       field: "shippingAddress",
@@ -230,26 +207,26 @@ const OrderList: React.FC = () => {
       align: "center",
       renderCell: (params) => (
         <Box
-        sx={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          width: "100%",
-          height: "100%"
-        }}
-      >
-        <Stack direction="row" spacing={1} justifyContent="center">
-          <Tooltip title="View Details">
-            <IconButton
-              color="primary"
-              onClick={() => handleViewOrder(params.row)}
-              size="small"
-            >
-              <VisibilityIcon fontSize="small" />
-            </IconButton>
-          </Tooltip>
-        </Stack>
-      </Box>
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            width: "100%",
+            height: "100%",
+          }}
+        >
+          <Stack direction="row" spacing={1} justifyContent="center">
+            <Tooltip title="View Details">
+              <IconButton
+                color="primary"
+                onClick={() => handleViewOrder(params.row)}
+                size="small"
+              >
+                <VisibilityIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
+          </Stack>
+        </Box>
       ),
     },
   ];
@@ -321,10 +298,8 @@ const OrderList: React.FC = () => {
         open={detailDialog}
         onClose={() => setDetailDialog(false)}
         order={selectedOrder}
-        onConfirmOrder={handleConfirmOrder} 
+        onConfirmOrder={handleConfirmOrder}
         onConfirmRefund={handleConfirmRefund}
-
-        // onCancelOrder={handleCancelOrder} 
       />
     </Box>
   );
