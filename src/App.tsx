@@ -26,6 +26,7 @@ import Returns from "./page/Cart/Returns";
 import Shipperlayout from "./page/Shipper/ShipperLayout";
 import ShipperReturns from "./page/Shipper/ShipperReturns";
 import Pending from "./page/Cart/Pending";
+import PostDetail from "./page/PostDetail";
 
 function App() {
   const ProtectRoute = ({ children, requireRoles }: { children: JSX.Element, requireRoles?: string[] }) => {
@@ -52,6 +53,7 @@ function App() {
         <Route path="/register" element={<RegisterPage />} />
 
         <Route path="home" element={<MainLayout><HomePage /></MainLayout>} />
+        <Route path="/post/:postId" element={<PostDetail />} />
         <Route path="allproduct" element={<ProtectRoute requireRoles={["User", "Admin", ""]}><MainLayout><ShowAllProduct /></MainLayout></ProtectRoute>} />
         <Route path="/productdetail/:id" element={<ProtectRoute requireRoles={["User", "Admin", ""]}><MainLayout><ProductDetails /></MainLayout></ProtectRoute>} />
         <Route path="/contact" element={<MainLayout><ContactPage /></MainLayout>} />

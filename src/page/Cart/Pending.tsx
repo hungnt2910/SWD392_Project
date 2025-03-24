@@ -18,6 +18,7 @@ import {
     DialogTitle,
     DialogContent,
     DialogContentText,
+    Divider,
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import axios from "axios";
@@ -25,7 +26,6 @@ import { portserver } from "../../utils/portserver";
 import { jwtDecode } from "jwt-decode";
 import { Box } from "@mui/system";
 import { formatDate, formatMoney } from "../../utils/format";
-import { useNavigate } from "react-router-dom";
 import { FaMoneyBillWave, FaQrcode } from "react-icons/fa";
 import { toast, ToastContainer } from "react-toastify";
 
@@ -43,32 +43,36 @@ interface Order {
     shippingAddress: string;
     timestamp: string;
     orderDetails: OrderDetail[];
+    receiverName: string,
+    phoneNumber: number
 }
 
 function Pending() {
     const [orders, setOrders] = useState<Order[]>([]);
     const token = localStorage.getItem('token');
-    const decode = token ? jwtDecode<{ userId: number }>(token) : null;
     const [selectedOrderId, setSeclectedOrderId] = useState<number>()
     const [openPaymentDialog, setOpenPaymentDialog] = useState(false);
 
-    useEffect(() => {
-        const fetchOrders = async () => {
-            try {
-                const res = await axios.get(`${portserver}/orders`,
-                    {
-                        headers: {
-                            "Content-Type": "application/json",
-                            "Authorization": `Bearer ${token}`
-                        }
+    const fetchOrders = async () => {
+        try {
+            const res = await axios.get(`${portserver}/orders`,
+                {
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${token}`
                     }
-                );
-                const data = res.data.filter((i: any) => i.status === 'pending')
-                setOrders(data);
-            } catch (error) {
-                console.error("Failed to fetch orders", error);
-            }
+                }
+            );
+            const data = res.data.filter((i: any) => i.status === 'pending')
+            setOrders(data);
+        } catch (error) {
+            console.error("Failed to fetch orders", error);
         }
+    }
+
+    console.log(orders)
+
+    useEffect(() => {
         fetchOrders();
     }, []);
 
@@ -112,10 +116,11 @@ function Pending() {
         }
     };
 
+
+
     return (
         <Box sx={{ px: 3 }}>
-
-            <Dialog open={openPaymentDialog} onClose={() => setOpenPaymentDialog(false)}>
+            <Dialog open={openPaymentDialog} onClose={() => setOpenPaymentDialog(false)} fullWidth maxWidth="sm">
                 <DialogTitle sx={{ textAlign: "center", fontWeight: "bold", color: "#D81B60" }}>
                     Chọn phương thức thanh toán
                 </DialogTitle>
@@ -123,36 +128,27 @@ function Pending() {
                     <DialogContentText sx={{ textAlign: "center", mb: 2 }}>
                         Hãy chọn phương thức thanh toán phù hợp cho đơn hàng của bạn.
                     </DialogContentText>
+
                     <Box display="flex" flexDirection="column" gap={2}>
                         <Button
                             onClick={() => handlePaymentSelection("zalopay")}
                             sx={{
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "center",
-                                gap: 1,
-                                backgroundColor: "#F8BBD0",
-                                color: "#D81B60",
+                                display: "flex", alignItems: "center", justifyContent: "center", gap: 1,
+                                backgroundColor: "#F8BBD0", color: "#D81B60",
                                 "&:hover": { backgroundColor: "#D81B60", color: "white" }
                             }}
                         >
-                            <FaQrcode size={20} />
-                            Thanh toán bằng ZaloPay
+                            <FaQrcode size={20} /> Thanh toán bằng ZaloPay
                         </Button>
                         <Button
                             onClick={() => handlePaymentSelection("cod")}
                             sx={{
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "center",
-                                gap: 1,
-                                backgroundColor: "#FCE4EC",
-                                color: "#D81B60",
+                                display: "flex", alignItems: "center", justifyContent: "center", gap: 1,
+                                backgroundColor: "#FCE4EC", color: "#D81B60",
                                 "&:hover": { backgroundColor: "#D81B60", color: "white" }
                             }}
                         >
-                            <FaMoneyBillWave size={20} />
-                            Thanh toán khi nhận hàng (COD)
+                            <FaMoneyBillWave size={20} /> Thanh toán khi nhận hàng (COD)
                         </Button>
                     </Box>
                 </DialogContent>
@@ -172,6 +168,8 @@ function Pending() {
                                 <Grid container spacing={2}>
                                     <Grid item xs={12} md={6}>
                                         <Typography component='div'><strong>Status:</strong>  {getStatusChip(order.status)}</Typography>
+                                        <Typography><strong>Reciever Name: </strong> {order.receiverName}</Typography>
+                                        <Typography><strong>Phone Number:</strong> {order.phoneNumber}</Typography>
                                         <Typography><strong>Total:</strong> {formatMoney(order.amount)}</Typography>
                                         <Typography><strong>Shipping Address:</strong> {order.shippingAddress}</Typography>
                                         <Typography><strong>Date:</strong> {formatDate(order.timestamp)}</Typography>

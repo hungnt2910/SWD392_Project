@@ -1,7 +1,10 @@
 import {
     Container, Grid, Typography, Button, Card, CardMedia, CardContent, IconButton,
     Box, Skeleton,
-    CircularProgress
+    CircularProgress,
+    Rating,
+    Paper,
+    TextField
 } from "@mui/material";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
@@ -12,7 +15,7 @@ import { portserver } from "../utils/portserver";
 import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
-import { ArrowBackIos, ArrowForwardIos, LocalOffer, Star } from "@mui/icons-material";
+import { ArrowBackIos, ArrowForwardIos, LocalOffer, Send, Star } from "@mui/icons-material";
 import { useCart } from "../hooks/useCart";
 import { formatMoney } from "../utils/format";
 import { Dialog, DialogActions, DialogContent, DialogTitle } from "@mui/material";
@@ -48,6 +51,15 @@ type Detail = {
     category: string
     averageRating: string
 };
+
+type Review = {
+    reviewId: number,
+    rating: number,
+    comment: string,
+    reviewDate: Date,
+    userId: number,
+    username: string
+}
 
 const PrevArrow = ({ onClick }: { onClick?: () => void }) => (
     <IconButton
@@ -90,6 +102,8 @@ const ProductDetails = () => {
     const [detail2, setDetail2] = useState<Detail | null>(null);
     const [showCompare, setShowCompare] = useState(false)
     const [isLoadingDetail, setIsLoadingDetail] = useState(true);
+    const [reviews, setRviews] = useState<Review[]>([])
+
 
 
     const settings = {
@@ -115,6 +129,7 @@ const ProductDetails = () => {
 
     useEffect(() => {
         getProDetails();
+        handleGetReview();
         window.scrollTo({ top: 0, behavior: "smooth" });
     }, [id]);
 
@@ -151,6 +166,15 @@ const ProductDetails = () => {
         }
     }
 
+    const handleGetReview = async () => {
+        try {
+            const res = await axios.get(`${portserver}/reviews/getReviewsByProductId/${productId}`);
+            setRviews(res.data)
+        } catch (err) {
+            console.error(err);
+        }
+    }
+
     return (
         <Container maxWidth="lg" sx={{ mt: 4 }}>
             <Dialog open={showAll} onClose={() => setShowAll(false)} maxWidth="lg" fullWidth>
@@ -160,17 +184,39 @@ const ProductDetails = () => {
                         {allpro ? (
                             allpro.map((item: any) => (
                                 <Grid item xs={12} sm={6} md={3} key={item.productId}>
-                                    <Card sx={{ borderRadius: "16px", boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.1)" }}>
+                                    <Card
+                                        sx={{
+                                            borderRadius: "16px",
+                                            boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.1)",
+                                            height: "450px",
+                                            display: "flex",
+                                            flexDirection: "column",
+                                        }}
+                                    >
                                         <CardMedia
                                             component="img"
-                                            height="200"
+                                            height="250"
                                             image={item.urlImage}
                                             alt={item.productName}
-                                            sx={{ borderRadius: "16px" }}
+                                            sx={{
+                                                width: "100%",
+                                                objectFit: "cover",
+                                                borderTopLeftRadius: "16px",
+                                                borderTopRightRadius: "16px",
+                                            }}
                                         />
-                                        <CardContent sx={{ textAlign: "center" }}>
-                                            <Typography variant="h6">{item.productName}</Typography>
-                                            <Typography variant="body2">{formatMoney(item.price)}</Typography>
+                                        <CardContent
+                                            sx={{
+                                                textAlign: "center",
+                                                flex: 1,
+                                                display: "flex",
+                                                flexDirection: "column",
+                                            }}
+                                        >
+                                            <Typography variant="h6" sx={{ flexGrow: 1 }}>{item.productName}</Typography>
+                                            <Typography variant="body2" sx={{ flexGrow: 1 }}>{formatMoney(item.price)}</Typography>
+
+                                            <Box sx={{ flexGrow: 1 }} />
 
                                             <Button
                                                 variant="contained"
@@ -181,13 +227,14 @@ const ProductDetails = () => {
                                                     textTransform: "none",
                                                     fontSize: "1rem",
                                                     backgroundColor: "#F06292",
-                                                    "&:hover": { backgroundColor: "#D81B60" }
+                                                    "&:hover": { backgroundColor: "#D81B60" },
                                                 }}
                                             >
-                                                Chooose
+                                                Choose
                                             </Button>
                                         </CardContent>
                                     </Card>
+
                                 </Grid>
                             ))
                         ) : (
@@ -222,24 +269,41 @@ const ProductDetails = () => {
                                                 p: 2,
                                                 border: "1px solid #ddd",
                                                 backgroundColor: "#FAFAFA",
+                                                height: "500px",
                                             }}
                                         >
                                             <CardMedia
                                                 component="img"
                                                 image={item?.urlImage}
                                                 alt={item?.productName}
-                                                sx={{ width: 220, height: 220, objectFit: "cover", borderRadius: 2 }}
+                                                sx={{
+                                                    width: 220,
+                                                    height: 220,
+                                                    objectFit: "cover",
+                                                    borderRadius: 2,
+                                                }}
                                             />
-                                            <CardContent sx={{ textAlign: "center", width: "100%" }}>
-                                                <Typography variant="h6" sx={{ fontWeight: "bold", color: "#333" }}>
+                                            <CardContent
+                                                sx={{
+                                                    textAlign: "center",
+                                                    width: "100%",
+                                                    flex: 1,
+                                                    display: "flex",
+                                                    flexDirection: "column",
+                                                }}
+                                            >
+                                                <Typography variant="h6" sx={{ fontWeight: "bold", color: "#333", flexGrow: 1 }}>
                                                     {item?.productName}
                                                 </Typography>
-                                                <Typography variant="body2" color="textSecondary">
+                                                <Typography variant="body2" color="textSecondary" sx={{ flexGrow: 1 }}>
                                                     {item?.category}
                                                 </Typography>
-                                                <Typography variant="body2" sx={{ my: 1 }}>
+                                                <Typography variant="body2" sx={{ my: 1, flexGrow: 1 }}>
                                                     {item?.description}
                                                 </Typography>
+
+                                                <Box sx={{ flexGrow: 1 }} />
+
                                                 <Grid container justifyContent="center" spacing={2} sx={{ mt: 1 }}>
                                                     <Grid item sx={{ display: "flex", alignItems: "center" }}>
                                                         <LocalOffer sx={{ color: "#FF5722", mr: 1 }} />
@@ -256,6 +320,7 @@ const ProductDetails = () => {
                                                 </Grid>
                                             </CardContent>
                                         </Card>
+
                                     </Grid>
                                 ))}
                             </Grid>
@@ -540,6 +605,69 @@ const ProductDetails = () => {
                     </Box>
                 )
             }
+
+
+            <Box sx={{ display: 'flex', justifyContent: 'center', mt: 6 }}>
+                <Box sx={{ width: '100%' }}>
+                    <Typography variant="h4" sx={{ mb: 3, color: '#D81B60', fontWeight: 'bold' }}>
+                        📝 Product Review
+                    </Typography>
+
+                    {/* Displaying Previous Reviews */}
+                    <Box sx={{ mt: 4 }}>
+                        <Box sx={{ maxHeight: '400px', overflowY: 'auto' }}>
+                            {reviews?.length === 0 ? (
+                                <Typography variant="body1" sx={{ color: '#333', textAlign: 'center' }}>No reviews yet</Typography>
+                            ) : (
+                                reviews?.map((review) => (
+                                    <Box sx={{ border: '1px solid #D81B60', p: 2, borderRadius: '16px', width: '100%', mb: 3 }}>
+                                        <Grid container spacing={1}>
+                                            {/* User and Rating Section */}
+                                            <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                                <Typography variant="h6" sx={{ color: '#D81B60', fontWeight: 'bold' }}>
+                                                    {review.username}
+                                                </Typography>
+
+                                                <Rating
+                                                    value={review.rating}
+                                                    readOnly
+                                                    precision={0.5}
+                                                    size="large"
+                                                    sx={{
+                                                        '& .MuiRating-iconFilled': {
+                                                            color: 'orange',
+                                                        },
+                                                        '& .MuiRating-iconEmpty': {
+                                                            color: '#ccc',
+                                                        },
+                                                    }}
+                                                />
+                                            </Grid>
+
+                                            {/* Review Date and Comment Section */}
+                                            <Grid item xs={12}>
+                                                <Typography variant="body2" sx={{ color: '#777', mb: 1 }}>
+                                                    {new Date(review.reviewDate).toLocaleDateString()}
+                                                </Typography>
+
+                                                <Typography variant="body1" sx={{ color: '#333', mb: 2 }}>
+                                                    {review.comment}
+                                                </Typography>
+                                            </Grid>
+                                        </Grid>
+                                    </Box>
+                                ))
+                            )}
+                        </Box>
+                    </Box>
+                </Box>
+            </Box>
+
+
+
+
+
+
         </Container >
     );
 };

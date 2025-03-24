@@ -1,6 +1,6 @@
 import { Card, CardMedia, Box, Button, Dialog, DialogTitle, DialogContent, DialogActions, DialogContentText, Stack, Typography } from "@mui/material";
 import ImageCarousel from "../../components/ImageCarousel";
-import BestSell from "./BestSell";
+
 import OurProduct from "./OurProduct";
 import media from '../../assets/set-of-flyers-with-woman-cosmetics-beauty-products-beauty-skin-care-cosmetics-shower-concept-illustration-for-banner-card-advertising-poster-vector.jpg'
 import { useState } from "react";
@@ -9,6 +9,9 @@ import { portserver } from "../../utils/portserver";
 import { FaPhone } from "react-icons/fa";
 import { PersonOutline, CheckCircleOutline, CancelOutlined } from "@mui/icons-material";
 import { jwtDecode } from "jwt-decode";
+import Voucher from "./Voucher";
+import Post from "./Post";
+import QuizPro from "./QuizPro";
 
 
 function HomePage() {
@@ -16,6 +19,7 @@ function HomePage() {
     const [confirmOpen, setConfirmOpen] = useState(false);
     const token = localStorage.getItem('token');
     const decode = token ? jwtDecode<{ userId: number }>(token) : null;
+    const skinTypeId = localStorage.getItem('skinTypeId')
 
     const handleChatClick = () => {
         setConfirmOpen(true);
@@ -41,13 +45,20 @@ function HomePage() {
     return (
         <div>
             <ImageCarousel />
-            <BestSell />
 
-            <Box sx={{ px: 7, my: 5 }}>
-                <Card>
-                    <CardMedia component="img" height="370" image={media} alt="Ưu đãi skincare" />
-                </Card>
-            </Box>
+            <Voucher />
+
+            {!skinTypeId ?
+                <Box sx={{ px: 7, my: 5 }}>
+                    <Card>
+                        <CardMedia component="img" height="500" image={media} alt="Ưu đãi skincare" />
+                    </Card>
+                </Box>
+                :
+                <QuizPro />
+            }
+
+            <Post />
 
             <OurProduct />
 
