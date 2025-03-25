@@ -26,6 +26,7 @@ import Dashboard from "./dashboard/pages/admin/Dashboard";
 import ManageUsers from "./dashboard/pages/admin/ManageUsers";
 import SkincareRoutine from "./page/SkincareRoutine";
 import Order from "./page/Cart/Order";
+import GGMeet from "./dashboard/pages/staff/GGMeet";
 import Shipper from './page/Shipper/Shipper'
 
 function App() {
@@ -80,6 +81,7 @@ function App() {
           <Route path="reviews" element={<CheckLogin><ManageReviews /></CheckLogin>} />
           <Route path="blogs" element={<CheckLogin><ManageBlogs /></CheckLogin>} />
           <Route path="voucher" element={<CheckLogin><CreateVoucher /></CheckLogin>} />
+          <Route path="meet" element={<CheckLogin><GGMeet /></CheckLogin>} />
         </Route>
 
         {/* Admin */}

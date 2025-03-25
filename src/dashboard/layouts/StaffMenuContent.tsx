@@ -19,6 +19,7 @@ import ArticleIcon from '@mui/icons-material/Article';
 import Collapse from '@mui/material/Collapse';
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { CiLogout } from "react-icons/ci";
+import VideoCall from '@mui/icons-material/VideoCall';
 
 const mainMenuItems = [
   { text: "Manage Members", path: "/staff/members", icon: <GroupIcon /> },
@@ -28,6 +29,7 @@ const mainMenuItems = [
     { text: "Manage Blogs", path: "/staff/blogs", icon: <ArticleIcon /> },
   //   { text: "Customize Skin Route", path: "/dashboard/staff/skin-route", icon: <RouteIcon /> },
     { text: "Create Voucher", path: "/staff/voucher", icon: <LocalOfferIcon /> },
+    { text: "Google Meet", path: "/staff/meet", icon: <VideoCall /> },
 ];
 
 const orderSubMenuItems = [
