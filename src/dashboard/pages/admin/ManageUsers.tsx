@@ -22,8 +22,8 @@ import EditUserDialog from "./EditUserDialog";
 import CreateUserDialog from "./CreateUserDialog";
 import AddIcon from "@mui/icons-material/Add";
 import { Typography } from "@mui/material";
+import InfoIcon from "@mui/icons-material/Info"; // Icon thông tin cho dialog cảnh báo
 
-// Cập nhật interface phù hợp với API
 interface User {
   id: string;
   username: string;
@@ -43,6 +43,7 @@ export default function ManageUsers() {
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [userToEdit, setUserToEdit] = useState<User | null>(null);
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
+  const [ordersWarningDialogOpen, setOrdersWarningDialogOpen] = useState(false);
 
   useEffect(() => {
     fetchUsers();
@@ -51,9 +52,12 @@ export default function ManageUsers() {
   const fetchUsers = async () => {
     try {
       setLoading(true);
-      const response = await axios.get(`${portserver}/admin/user`);
-      // Lọc ra chỉ những user có status = true
-      const activeUsers = response.data.filter((user) => user.status === true);
+      const response = await axios.get(`${portserver}/admin/user`,{
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
+      const activeUsers = response.data.filter((user: { status: boolean; }) => user.status === true);
       setUsers(activeUsers);
       setError(null);
     } catch (err) {
@@ -64,18 +68,38 @@ export default function ManageUsers() {
     }
   };
 
-  // Mở dialog xác nhận xóa user
-  const confirmDeleteUser = (id: string) => {
-    setUserToDelete(id);
-    setDeleteConfirmOpen(true);
+  const confirmDeleteUser = async (id: string) => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        setError("Authentication token not found. Please login again.");
+        return;
+      }
+      
+      const response = await axios.get(`${portserver}/orders/${id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      
+      if (response.data && response.data.length > 0) {
+        setUserToDelete(id);
+        setOrdersWarningDialogOpen(true);
+      } else {
+        setUserToDelete(id);
+        setDeleteConfirmOpen(true);
+      }
+    } catch (err) {
+      console.error("Error checking user orders:", err);
+      setUserToDelete(id);
+      setDeleteConfirmOpen(true);
+    }
   };
 
-  // Xóa user sau khi xác nhận
   const deleteUser = async () => {
     if (!userToDelete) return;
 
     try {
-      // Lấy token từ localStorage
       const token = localStorage.getItem("token");
 
       if (!token) {
@@ -83,17 +107,14 @@ export default function ManageUsers() {
         return;
       }
 
-      // Sử dụng DELETE method với API endpoint admin/user/:id và thêm bearer token
       await axios.delete(`${portserver}/admin/user/${userToDelete}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
 
-      // Xóa user khỏi state
       setUsers(users.filter((user) => user.id !== userToDelete));
 
-      // Đóng dialog xác nhận
       setDeleteConfirmOpen(false);
       setUserToDelete(null);
     } catch (err) {
@@ -111,12 +132,10 @@ export default function ManageUsers() {
   };
 
   const handleUserUpdated = () => {
-    // Refresh lại danh sách users khi cập nhật thành công
     fetchUsers();
   };
 
   const handleUserCreated = () => {
-    // Refresh lại danh sách users khi tạo thành công
     fetchUsers();
   };
 
@@ -162,6 +181,7 @@ export default function ManageUsers() {
       minWidth: 100,
       headerAlign: "center",
       align: "center",
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       renderCell: (params: GridRenderCellParams) => (
         <Chip label="Active" color="success" size="small" />
       ),
@@ -187,7 +207,6 @@ export default function ManageUsers() {
             </IconButton>
           </Tooltip>
 
-          {/* Thay nút deactivate bằng nút delete */}
           <Tooltip title="Delete User">
             <IconButton
               color="error"
@@ -258,9 +277,17 @@ export default function ManageUsers() {
         pageSizeOptions={[10, 15, 30]}
         disableRowSelectionOnClick
         disableColumnMenu
+        sx={{
+          '& .MuiDataGrid-cell:focus': {
+            outline: 'none',
+          },
+          '& .MuiDataGrid-cell:focus-within': {
+            outline: 'none',
+          },
+        }}
       />
 
-      {/* Dialog xác nhận xóa user */}
+      {/* Dialog confirm xóa user */}
       <Dialog
         open={deleteConfirmOpen}
         onClose={() => setDeleteConfirmOpen(false)}
@@ -276,6 +303,30 @@ export default function ManageUsers() {
           <Button onClick={() => setDeleteConfirmOpen(false)}>Cancel</Button>
           <Button onClick={deleteUser} color="error" variant="contained">
             Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Dialog cảnh báo có order */}
+      <Dialog
+        open={ordersWarningDialogOpen}
+        onClose={() => setOrdersWarningDialogOpen(false)}
+      >
+        <DialogTitle sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <InfoIcon color="warning" />
+          Cannot Delete User
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            This user has order history and cannot be deleted. Deleting users with existing orders would corrupt data integrity.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button 
+            onClick={() => setOrdersWarningDialogOpen(false)}
+            variant="contained"
+          >
+            Close
           </Button>
         </DialogActions>
       </Dialog>

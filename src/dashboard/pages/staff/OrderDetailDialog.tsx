@@ -19,6 +19,7 @@ import Chip from "@mui/material/Chip";
 import CircularProgress from "@mui/material/CircularProgress";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import CancelIcon from "@mui/icons-material/Cancel";
+import MoneyOffIcon from "@mui/icons-material/MoneyOff";
 import { format } from "date-fns";
 
 export interface OrderDetail {
@@ -28,13 +29,24 @@ export interface OrderDetail {
   productName: string;
 }
 
+export interface ReturnOrderDetail {
+  returnOrderDetailId: number;
+  price: number;
+  quantity: number;
+  productName: string;
+}
+
 export interface Order {
   orderId: number;
+  username: string;
   status: string;
   amount: number;
+  receiverName?: string;
+  phoneNumber?: string;
   shippingAddress: string;
   timestamp: string;
   orderDetails: OrderDetail[];
+  returnOrderDetails?: ReturnOrderDetail[];
 }
 
 interface OrderDetailDialogProps {
@@ -43,6 +55,7 @@ interface OrderDetailDialogProps {
   order: Order | null;
   onConfirmOrder?: (orderId: number) => Promise<void>;
   onCancelOrder?: (orderId: number) => Promise<void>;
+  onConfirmRefund?: (orderId: number) => Promise<void>;
   processing?: boolean;
 }
 
@@ -66,15 +79,19 @@ export const formatPrice = (price: number): string => {
 export const getStatusColor = (
   status: string
 ): "success" | "warning" | "info" | "error" | "default" => {
-  switch (status) {
-    case "Completed":
+  switch (status.toLowerCase()) {
+    case "completed":
       return "success";
-    case "Pending":
+    case "pending":
+    case "ready to refund":
       return "warning";
-    case "Shipped":
-    case "Confirmed":
+    case "shipped":
+    case "confirmed":
+    case "paid":
       return "info";
-    case "Cancelled":
+    case "cancelled":
+    case "refunded":
+    case "returned":
       return "error";
     default:
       return "default";
@@ -91,6 +108,7 @@ const OrderDetailDialog: React.FC<OrderDetailDialogProps> = ({
   order,
   onConfirmOrder,
   onCancelOrder,
+  onConfirmRefund,
   processing = false,
 }) => {
   const [localProcessing, setLocalProcessing] = useState<boolean>(false);
@@ -98,8 +116,30 @@ const OrderDetailDialog: React.FC<OrderDetailDialogProps> = ({
 
   if (!order) return null;
 
-  const isPaid = order.status === "Paid";
+  if (
+    order.orderDetails.length === 0 &&
+    order.returnOrderDetails &&
+    order.returnOrderDetails.length > 0
+  ) {
+    order = {
+      ...order,
+      orderDetails: order.returnOrderDetails.map((item) => ({
+        orderDetailId: item.returnOrderDetailId,
+        price: item.price,
+        quantity: item.quantity,
+        productName: item.productName,
+      })),
+    };
+  }
 
+  const isPaid = order.status.toLowerCase() === "paid";
+  const isReturned = order.status.toLowerCase() === "returned";
+  const isShowingReturnItems =
+    order.returnOrderDetails &&
+    order.returnOrderDetails.length > 0 &&
+    order.orderDetails.length === 0;
+
+  // Các hàm xử lý sự kiện (giữ nguyên)
   const handleConfirm = async () => {
     if (!onConfirmOrder) return;
 
@@ -123,6 +163,20 @@ const OrderDetailDialog: React.FC<OrderDetailDialogProps> = ({
       onClose();
     } catch (error) {
       console.error("Error cancelling order:", error);
+    } finally {
+      setLocalProcessing(false);
+    }
+  };
+
+  const handleRefund = async () => {
+    if (!onConfirmRefund) return;
+
+    setLocalProcessing(true);
+    try {
+      await onConfirmRefund(order.orderId);
+      onClose();
+    } catch (error) {
+      console.error("Error confirming refund:", error);
     } finally {
       setLocalProcessing(false);
     }
@@ -173,7 +227,23 @@ const OrderDetailDialog: React.FC<OrderDetailDialogProps> = ({
               <strong>Total Items:</strong>{" "}
               {calculateTotalItems(order.orderDetails)}
             </Typography>
+            <Typography variant="body2">
+              <strong>Customer:</strong> {order.username || "Unknown User"}
+            </Typography>
           </Stack>
+
+          {order.receiverName && (
+            <Typography variant="body2" gutterBottom>
+              <strong>Receiver:</strong> {order.receiverName}
+            </Typography>
+          )}
+
+          {order.phoneNumber && (
+            <Typography variant="body2" gutterBottom>
+              <strong>Phone:</strong> {order.phoneNumber}
+            </Typography>
+          )}
+
           <Typography
             variant="body2"
             gutterBottom
@@ -190,7 +260,7 @@ const OrderDetailDialog: React.FC<OrderDetailDialogProps> = ({
         </Box>
 
         <Typography variant="subtitle2" color="text.secondary" gutterBottom>
-          Order Items
+          {isShowingReturnItems ? "Returned Items" : "Order Items"}
         </Typography>
         <TableContainer component={Paper} variant="outlined">
           <Table size="small">
@@ -240,6 +310,26 @@ const OrderDetailDialog: React.FC<OrderDetailDialogProps> = ({
             </TableBody>
           </Table>
         </TableContainer>
+
+        {isShowingReturnItems && (
+          <Box
+            sx={{
+              mt: 2,
+              display: "flex",
+              alignItems: "center",
+              color: "warning.dark",
+              bgcolor: "warning.light",
+              py: 1,
+              px: 2,
+              borderRadius: 1,
+            }}
+          >
+            <MoneyOffIcon sx={{ mr: 1 }} fontSize="small" />
+            <Typography variant="body2">
+              Showing items that have been returned.
+            </Typography>
+          </Box>
+        )}
       </DialogContent>
 
       <DialogActions>
@@ -268,6 +358,18 @@ const OrderDetailDialog: React.FC<OrderDetailDialogProps> = ({
             startIcon={<CancelIcon />}
           >
             Cancel Order
+          </Button>
+        )}
+
+        {isReturned && onConfirmRefund && (
+          <Button
+            variant="contained"
+            color="success"
+            onClick={handleRefund}
+            disabled={isProcessing}
+            startIcon={<CheckCircleIcon />}
+          >
+            Process Refund
           </Button>
         )}
       </DialogActions>

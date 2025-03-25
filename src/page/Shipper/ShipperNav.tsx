@@ -1,19 +1,15 @@
 import { Toolbar, Button, Box } from "@mui/material";
 import { Link, useLocation } from "react-router-dom";
 
-function CartNav() {
+function ShipperNav() {
     const location = useLocation();
 
     return (
         <Box sx={{ display: "flex", justifyContent: "center", width: "100%" }}>
             <Toolbar sx={{ display: "flex", justifyContent: "center", gap: 2 }}>
                 {[
-                    { label: "Cart", path: "/cart" },
-                    { label: "Pending", path: "/pending" },
-                    { label: "My Orders", path: "/orders" },
-                    { label: "In Progress", path: "/in-progress" },
-                    { label: "Delivered", path: "/delivered" },
-                    { label: "Returns/Refunds", path: "/returns" },
+                    { label: "Delivery", path: "/shipper/delivery" },
+                    { label: "Returns", path: "/shipper/returns" },
                 ].map(({ label, path }) => (
                     <Button
                         key={path}
@@ -41,4 +37,4 @@ function CartNav() {
     );
 }
 
-export default CartNav;
+export default ShipperNav;

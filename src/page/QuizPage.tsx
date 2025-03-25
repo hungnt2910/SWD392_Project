@@ -25,12 +25,18 @@ type SelectedAnswer = {
     quizChoiceId: number;
 };
 
-type SkinType = "Da dầu" | "Da nhạy cảm" | "Da thường" | "Da khô" | "";
+type SkinType =
+    | { type: "Da dầu", skinTypeId: 2 }
+    | { type: "Da nhạy cảm", skinTypeId: 4 }
+    | { type: "Da thường", skinTypeId: 1 }
+    | { type: "Da khô", skinTypeId: 1 }
+    | { type: "", skinTypeId: 5 };
+
 
 const QuizPage: React.FC = () => {
     const [selectedAnswers, setSelectedAnswers] = useState<SelectedAnswer[]>([]);
     const [quizs, setQuizs] = useState<Quiz[]>([]);
-    const [result, setResult] = useState<SkinType>("");
+    const [result, setResult] = useState<SkinType | null>(null);
     const [openDialog, setOpenDialog] = useState<boolean>(false);
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const token = localStorage.getItem('token');
@@ -49,43 +55,49 @@ const QuizPage: React.FC = () => {
         });
     };
 
-    const handleSubmit = async () => {
+    const handleSubmit = () => {
         if (selectedAnswers.length !== quizs.length) {
             toast.error("Please answer all questions")
             return;
         }
 
         setIsLoading(true);
-        setResult("");
+        setResult(null);
 
         const formatedAns = selectedAnswers.map((a) => ({ quizId: a.quizId, quizAnswer: a.quizChoiceId }))
 
-        try {
-            await axios.post(`${portserver}/quiz/${decode?.userId}`, formatedAns)
-                .then(res => {
-                    setResult(res.data)
-                    setTimeout(() => {
-                        setIsLoading(false);
-                        setOpenDialog(true);
-                        setSelectedAnswers([])
-                    }, 1500)
-                })
-        } catch (error) {
-            console.error("Error submitting answers: ", error);
-        }
+        axios.post(`${portserver}/quiz/${decode?.userId}`, formatedAns)
+            .then(res => {
+                localStorage.setItem('skinTypeId', res.data.skinTypeId)
+                setResult(res.data.type)
+                setTimeout(() => {
+                    setIsLoading(false);
+                    setOpenDialog(true);
+                    setSelectedAnswers([])
+                }, 1500)
+            })
+            .catch(e => {
+                toast.error(e.response.data.message)
+                setTimeout(() => {
+                    setIsLoading(false);
+                    setSelectedAnswers([])
+                }, 1000)
+            })
+
     };
 
     const getSkinTypeImage = (skinType: SkinType): string => {
-        const images: Record<SkinType, string> = {
+        const images: Record<string, string> = {
             "Da dầu": oilSkin,
             "Da nhạy cảm": sensitiveSkin,
             "Da thường": normalSkin,
             "Da khô": drySkin,
             "": "https://example.com/default-skin.jpg"
         };
-        return images[skinType];
+        return images[skinType.type] || images[""];
     };
 
+    console.log(result)
     return (
         <Container maxWidth="md" sx={{ mt: 4 }}>
             <ToastContainer />
@@ -109,10 +121,10 @@ const QuizPage: React.FC = () => {
                     ) : (
                         <motion.div initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.5 }}>
                             <Box display="flex" flexDirection="column" alignItems="center" textAlign="center" p={2}>
-                                <Typography variant="h5" fontWeight="bold" color="#6a11cb" gutterBottom>{result}</Typography>
+                                <Typography variant="h5" fontWeight="bold" color="#6a11cb" gutterBottom>{result?.type}</Typography>
                                 <motion.img
-                                    src={getSkinTypeImage(result)}
-                                    alt={result}
+                                    src={result ? getSkinTypeImage(result) : "https://example.com/default-skin.jpg"}
+                                    alt={result?.type || "Unknown"}
                                     style={{ width: 150, height: 150, borderRadius: 10, marginBottom: 10 }}
                                     initial={{ opacity: 0, y: -20 }}
                                     animate={{ opacity: 1, y: 0 }}

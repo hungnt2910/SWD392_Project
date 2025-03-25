@@ -50,7 +50,7 @@ const OrderConfirm: React.FC = () => {
       });
 
       const paidOrders = response.data.filter(
-        (order: Order) => order.status === "Paid"
+        (order: Order) => order.status === "Paid" || order.status === "paid"
       );
 
       setOrders(paidOrders);
@@ -109,42 +109,42 @@ const OrderConfirm: React.FC = () => {
     }
   };
 
-  const handleCancelOrder = async (orderId: number) => {
-    try {
-      setProcessing(true);
+  // const handleCancelOrder = async (orderId: number) => {
+  //   try {
+  //     setProcessing(true);
 
-      const token = localStorage.getItem("token");
+  //     const token = localStorage.getItem("token");
 
-      if (!token) {
-        toast.error("Authentication token not found. Please login again.");
-        setProcessing(false);
-        return;
-      }
+  //     if (!token) {
+  //       toast.error("Authentication token not found. Please login again.");
+  //       setProcessing(false);
+  //       return;
+  //     }
 
-      await axios.put(
-        `${portserver}/orders/cancel/${orderId}`,
-        {},
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+  //     await axios.put(
+  //       `${portserver}/orders/cancel/${orderId}`,
+  //       {},
+  //       {
+  //         headers: {
+  //           Authorization: `Bearer ${token}`,
+  //         },
+  //       }
+  //     );
 
-      setOrders((prevOrders) =>
-        prevOrders.filter((order) => order.orderId !== orderId)
-      );
+  //     setOrders((prevOrders) =>
+  //       prevOrders.filter((order) => order.orderId !== orderId)
+  //     );
 
-      toast.info(`Order #${orderId} has been cancelled.`);
-      setDetailDialog(false);
-    } catch (err) {
-      console.error("Error cancelling order:", err);
-      toast.error("Failed to cancel order. Please try again.");
-      throw err;
-    } finally {
-      setProcessing(false);
-    }
-  };
+  //     toast.info(`Order #${orderId} has been cancelled.`);
+  //     setDetailDialog(false);
+  //   } catch (err) {
+  //     console.error("Error cancelling order:", err);
+  //     toast.error("Failed to cancel order. Please try again.");
+  //     throw err;
+  //   } finally {
+  //     setProcessing(false);
+  //   }
+  // };
 
   const columns: GridColDef[] = [
     {
@@ -154,6 +154,12 @@ const OrderConfirm: React.FC = () => {
       minWidth: 90,
       headerAlign: "center",
       align: "center",
+    },
+    {
+      field: "username",
+      headerName: "Customer",
+      flex: 1,
+      minWidth: 150,
     },
     {
       field: "shippingAddress",
@@ -236,7 +242,7 @@ const OrderConfirm: React.FC = () => {
                 <CheckCircleIcon fontSize="small" />
               </IconButton>
             </Tooltip>
-
+            {/* 
             <Tooltip title="Cancel Order">
               <IconButton
                 color="error"
@@ -246,7 +252,7 @@ const OrderConfirm: React.FC = () => {
               >
                 <CancelIcon fontSize="small" />
               </IconButton>
-            </Tooltip>
+            </Tooltip> */}
           </Stack>
         </Box>
       ),
@@ -326,7 +332,7 @@ const OrderConfirm: React.FC = () => {
         onClose={() => setDetailDialog(false)}
         order={selectedOrder}
         onConfirmOrder={handleConfirmOrder}
-        onCancelOrder={handleCancelOrder}
+        // onCancelOrder={handleCancelOrder}
         processing={processing}
       />
     </Box>

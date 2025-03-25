@@ -12,7 +12,7 @@ import {
     TableRow,
     Paper,
     Grid,
-    Chip,
+    Chip
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import axios from "axios";
@@ -20,7 +20,6 @@ import { portserver } from "../../utils/portserver";
 import { jwtDecode } from "jwt-decode";
 import { Box } from "@mui/system";
 import { formatDate, formatMoney } from "../../utils/format";
-import { useNavigate } from "react-router-dom";
 
 interface OrderDetail {
     orderDetailId: number;
@@ -35,21 +34,21 @@ interface Order {
     amount: number;
     shippingAddress: string;
     timestamp: string;
-    orderDetails: OrderDetail[];
+    returnDetails: OrderDetail[];
     receiverName: string,
     phoneNumber: number
+
 }
 
-const Order = () => {
+const Returns = () => {
     const [orders, setOrders] = useState<Order[]>([]);
     const token = localStorage.getItem('token');
     const decode = token ? jwtDecode<{ userId: number }>(token) : null;
-    const nav = useNavigate()
 
     useEffect(() => {
         const fetchOrders = async () => {
             try {
-                const res = await axios.get(`${portserver}/orders/getPaidOrderByUser/${decode?.userId}`,
+                const res = await axios.get(`${portserver}/orders/getRefundedOrderByUser/${decode?.userId}`,
                     {
                         headers: {
                             "Content-Type": "application/json",
@@ -65,13 +64,12 @@ const Order = () => {
         fetchOrders();
     }, []);
 
-
     const getStatusChip = (status: string) => {
-        let color: "warning" | "default";
+        let color: "error" | "default";
 
         switch (status.toLowerCase()) {
-            case "paid":
-                color = "warning";
+            case "refunded":
+                color = "error";
                 break;
             default:
                 color = "default";
@@ -83,10 +81,10 @@ const Order = () => {
     return (
         <Box sx={{ px: 3 }}>
 
-            <Typography variant="h4" gutterBottom sx={{ fontWeight: "bold" }}> 📝  Order List</Typography>
+            <Typography variant="h4" gutterBottom sx={{ fontWeight: "bold" }}>💸 return / refunde</Typography>
             <Box sx={{ px: 5 }}>
                 {
-                    orders.map((order) => (
+                    orders?.map((order) => (
                         <Accordion key={order.orderId} sx={{ mb: 2, border: "2px solid #F8BBD0" }} >
                             <AccordionSummary expandIcon={<ExpandMoreIcon />}>
                                 <Typography variant="h6">Order #{order.orderId}</Typography>
@@ -100,6 +98,9 @@ const Order = () => {
                                         <Typography><strong>Total:</strong> {formatMoney(order.amount)}</Typography>
                                         <Typography><strong>Shipping Address:</strong> {order.shippingAddress}</Typography>
                                         <Typography><strong>Date:</strong> {formatDate(order.timestamp)}</Typography>
+                                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                                            <Typography style={{ color: "green" }}><strong>Note:</strong> We have received the goods and the money will be sent back within 24 hours. </Typography>&nbsp;
+                                        </Box>
                                     </Grid>
                                     <Grid item xs={12}>
                                         <TableContainer component={Paper} sx={{ borderRadius: "16px", border: "2px solid #F8BBD0" }}>
@@ -112,7 +113,7 @@ const Order = () => {
                                                     </TableRow>
                                                 </TableHead>
                                                 <TableBody>
-                                                    {order.orderDetails.map((detail) => (
+                                                    {order?.returnDetails?.map((detail) => (
                                                         <TableRow key={detail.orderDetailId}>
                                                             <TableCell sx={{ textAlign: "center" }}>{detail.productName}</TableCell>
                                                             <TableCell sx={{ textAlign: "center" }}>{formatMoney(detail.price)}</TableCell>
@@ -133,4 +134,4 @@ const Order = () => {
     );
 };
 
-export default Order;
+export default Returns;

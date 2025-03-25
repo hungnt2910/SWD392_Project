@@ -2,35 +2,35 @@ import * as React from "react";
 import { useState, useEffect } from "react";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
+import Chip from "@mui/material/Chip";
 import Stack from "@mui/material/Stack";
 import IconButton from "@mui/material/IconButton";
 import Tooltip from "@mui/material/Tooltip";
 import CircularProgress from "@mui/material/CircularProgress";
 import Alert from "@mui/material/Alert";
-import { DataGrid, GridColDef, GridRenderCellParams } from "@mui/x-data-grid";
+import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import VisibilityIcon from "@mui/icons-material/Visibility";
-import { toast, ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
-import Chip from "@mui/material/Chip";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import axios from "axios";
 import { portserver } from "../../../utils/portserver";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 import OrderDetailDialog, {
   Order,
   formatPrice,
   formatDate,
-  getStatusColor,
 } from "./OrderDetailDialog";
 
-const OrderList: React.FC = () => {
+const OrderRefund: React.FC = () => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [processing, setProcessing] = useState<boolean>(false);
   const [detailDialog, setDetailDialog] = useState<boolean>(false);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
-  const [processing, setProcessing] = useState<boolean>(false);
 
-  const fetchOrders = async () => {
+  const fetchReturnedOrders = async () => {
     try {
       setLoading(true);
 
@@ -48,7 +48,11 @@ const OrderList: React.FC = () => {
         },
       });
 
-      setOrders(response.data);
+      const returnedOrders = response.data.filter(
+        (order: Order) => order.status === "returned" || order.status === "Returned"
+      );
+
+      setOrders(returnedOrders);
       setError(null);
     } catch (err) {
       console.error("Error fetching orders:", err);
@@ -59,7 +63,7 @@ const OrderList: React.FC = () => {
   };
 
   useEffect(() => {
-    fetchOrders();
+    fetchReturnedOrders();
   }, []);
 
   const handleViewOrder = (order: Order) => {
@@ -70,15 +74,15 @@ const OrderList: React.FC = () => {
   const handleConfirmRefund = async (orderId: number) => {
     try {
       setProcessing(true);
-  
+
       const token = localStorage.getItem("token");
-  
+
       if (!token) {
         toast.error("Authentication token not found. Please login again.");
         setProcessing(false);
         return;
       }
-  
+
       await axios.put(
         `${portserver}/orders/confirmReturn/${orderId}`,
         {},
@@ -88,15 +92,11 @@ const OrderList: React.FC = () => {
           },
         }
       );
-  
+
       setOrders((prevOrders) =>
-        prevOrders.map((order) =>
-          order.orderId === orderId
-            ? { ...order, status: "ready to refund" }
-            : order
-        )
+        prevOrders.filter((order) => order.orderId !== orderId)
       );
-  
+
       toast.success(`Order #${orderId} has been marked as ready to refund!`);
       setDetailDialog(false);
     } catch (err) {
@@ -105,39 +105,6 @@ const OrderList: React.FC = () => {
       throw err;
     } finally {
       setProcessing(false);
-    }
-  };
-
-  const handleConfirmOrder = async (orderId: number) => {
-    try {
-      const token = localStorage.getItem("token");
-
-      if (!token) {
-        toast.error("Authentication token not found. Please login again.");
-        return;
-      }
-
-      await axios.put(
-        `${portserver}/orders/confirm/${orderId}`,
-        {},
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      setOrders(
-        orders.map((order) =>
-          order.orderId === orderId ? { ...order, status: "Confirmed" } : order
-        )
-      );
-
-      toast.success(`Order #${orderId} has been confirmed successfully!`);
-    } catch (err) {
-      console.error("Error confirming order:", err);
-      toast.error("Failed to confirm order. Please try again.");
-      throw err;
     }
   };
 
@@ -189,18 +156,13 @@ const OrderList: React.FC = () => {
       minWidth: 120,
       headerAlign: "center",
       align: "center",
-      renderCell: (params: GridRenderCellParams) => {
-        const status = params.value as string;
-        const chipColor = getStatusColor(status);
-
-        return <Chip label={status} color={chipColor} size="small" />;
-      },
+      renderCell: () => <Chip label="Returned" color="error" size="small" />,
     },
     {
       field: "actions",
       headerName: "Actions",
-      flex: 0.7,
-      minWidth: 100,
+      flex: 1.2,
+      minWidth: 170,
       sortable: false,
       filterable: false,
       headerAlign: "center",
@@ -215,14 +177,31 @@ const OrderList: React.FC = () => {
             height: "100%",
           }}
         >
-          <Stack direction="row" spacing={1} justifyContent="center">
+          <Stack
+            direction="row"
+            spacing={1}
+            justifyContent="center"
+            alignItems="center"
+          >
             <Tooltip title="View Details">
               <IconButton
-                color="primary"
+                color="info"
                 onClick={() => handleViewOrder(params.row)}
                 size="small"
+                disabled={processing}
               >
                 <VisibilityIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
+
+            <Tooltip title="Process Refund">
+              <IconButton
+                color="success"
+                onClick={() => handleConfirmRefund(params.row.orderId)}
+                size="small"
+                disabled={processing}
+              >
+                <CheckCircleIcon fontSize="small" />
               </IconButton>
             </Tooltip>
           </Stack>
@@ -251,7 +230,7 @@ const OrderList: React.FC = () => {
       <ToastContainer position="top-right" autoClose={3000} />
 
       <Typography variant="h5" component="h2" sx={{ mb: 2 }}>
-        Order Management
+        Return Requests
       </Typography>
 
       {error && (
@@ -260,49 +239,53 @@ const OrderList: React.FC = () => {
         </Alert>
       )}
 
-      <Box
-        sx={{
-          height: 600,
-          width: "100%",
-          bgcolor: "background.paper",
-          boxShadow: 1,
-          borderRadius: 1,
-          overflow: "hidden",
-        }}
-      >
-        <DataGrid
-          rows={orders}
-          columns={columns}
-          initialState={{
-            pagination: {
-              paginationModel: {
-                pageSize: 10,
-              },
-            },
-          }}
-          pageSizeOptions={[10, 15, 30]}
-          disableRowSelectionOnClick
-          getRowId={(row) => row.orderId}
+      {orders.length === 0 && !loading && !error ? (
+        <Alert severity="info">No pending return requests.</Alert>
+      ) : (
+        <Box
           sx={{
-            "& .MuiDataGrid-cell:focus": {
-              outline: "none",
-            },
-            "& .MuiDataGrid-cell:focus-within": {
-              outline: "none",
-            },
+            height: 600,
+            width: "100%",
+            bgcolor: "background.paper",
+            boxShadow: 1,
+            borderRadius: 1,
+            overflow: "hidden",
           }}
-        />
-      </Box>
+        >
+          <DataGrid
+            rows={orders}
+            columns={columns}
+            initialState={{
+              pagination: {
+                paginationModel: {
+                  pageSize: 10,
+                },
+              },
+            }}
+            pageSizeOptions={[10, 15, 30]}
+            disableRowSelectionOnClick
+            getRowId={(row) => row.orderId}
+            sx={{
+              "& .MuiDataGrid-cell:focus": {
+                outline: "none",
+              },
+              "& .MuiDataGrid-cell:focus-within": {
+                outline: "none",
+              },
+            }}
+          />
+        </Box>
+      )}
 
       <OrderDetailDialog
         open={detailDialog}
         onClose={() => setDetailDialog(false)}
         order={selectedOrder}
-        onConfirmOrder={handleConfirmOrder}
         onConfirmRefund={handleConfirmRefund}
+        processing={processing}
       />
     </Box>
   );
 };
 
-export default OrderList;
+export default OrderRefund;

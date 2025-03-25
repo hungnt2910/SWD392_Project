@@ -40,6 +40,10 @@ function OurProduct() {
         getAllProducts();
     }, []);
 
+    const checkStock = (pro: Product) => {
+        return pro.stock < 3;
+    };
+
     return (
         <Box sx={{ px: 10 }}>
             <Box sx={{ background: "linear-gradient(to bottom, #FFF0F5, #FFD1DC)", borderRadius: "16px", p: 3 }}>
@@ -93,7 +97,7 @@ function OurProduct() {
                                                 <Typography variant="body2" color="text.secondary" sx={{ mb: 2, color: "#5C5C5C" }}>{formatMoney(item.price)}</Typography>
                                             </Box>
                                             <Box>
-                                                <Button
+                                                {/* <Button
                                                     variant="contained"
                                                     fullWidth
                                                     onClick={() => addProduct({
@@ -111,7 +115,29 @@ function OurProduct() {
                                                     }}
                                                 >
                                                     Buy Now
+                                                </Button> */}
+
+                                                <Button
+                                                    variant="contained"
+                                                    fullWidth
+                                                    disabled={checkStock(item)}
+                                                    onClick={() => addProduct({
+                                                        productId: item.productId,
+                                                        productName: item.productName,
+                                                        price: item.price,
+                                                        quantity: 1
+                                                    })}
+                                                    sx={{
+                                                        borderRadius: "8px",
+                                                        textTransform: "none",
+                                                        fontSize: "1rem",
+                                                        backgroundColor: checkStock(item) ? "#BDBDBD" : "#F06292",
+                                                        "&:hover": { backgroundColor: checkStock(item) ? "#BDBDBD" : "#D81B60" }
+                                                    }}
+                                                >
+                                                    Buy Now
                                                 </Button>
+
                                             </Box>
                                         </Box>
                                     </CardContent>

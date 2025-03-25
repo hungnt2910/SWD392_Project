@@ -43,8 +43,15 @@ interface Product {
   brand: Brand;
   brandName: string;
   categoryName: string;
-}
+  productDetails?: ProductDetail[]; 
 
+}
+interface ProductDetail {
+  id: number;
+  productionDate: string;
+  expirationDate: string;
+  quantity: number;
+}
 interface Brand {
   brandId: number;
   brandName: string;
