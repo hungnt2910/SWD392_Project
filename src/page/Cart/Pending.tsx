@@ -70,8 +70,6 @@ function Pending() {
         }
     }
 
-    console.log(orders)
-
     useEffect(() => {
         fetchOrders();
     }, []);
@@ -105,8 +103,9 @@ function Pending() {
 
         try {
             const res = await axios.post(`${portserver}/payment/create/${selectedOrderId}`);
+            console.log(res.data)
             if (res.data.order_url) {
-                window.location.href = res.data.order_url;
+                window.open(res.data.order_url, "_blank");
             } else {
                 toast.error("Payment initiation failed.");
             }
@@ -116,6 +115,8 @@ function Pending() {
         }
     };
 
+
+    console.log(selectedOrderId)
 
 
     return (

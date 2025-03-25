@@ -69,7 +69,7 @@ const QuizPage: React.FC = () => {
         axios.post(`${portserver}/quiz/${decode?.userId}`, formatedAns)
             .then(res => {
                 localStorage.setItem('skinTypeId', res.data.skinTypeId)
-                setResult(res.data)
+                setResult(res.data.type)
                 setTimeout(() => {
                     setIsLoading(false);
                     setOpenDialog(true);
@@ -96,6 +96,8 @@ const QuizPage: React.FC = () => {
         };
         return images[skinType.type] || images[""];
     };
+
+    console.log(result)
     return (
         <Container maxWidth="md" sx={{ mt: 4 }}>
             <ToastContainer />

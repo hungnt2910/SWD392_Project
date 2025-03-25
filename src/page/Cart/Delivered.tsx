@@ -83,8 +83,6 @@ const Delivered = () => {
         fetchOrders();
     }, []);
 
-    console.log(orders)
-
     const getStatusChip = (status: string) => {
         return (
             <Chip
@@ -138,6 +136,8 @@ const Delivered = () => {
             phoneNumber: selectedOrder.phoneNumber
         };
 
+        console.log(requestBody)
+
         axios.post(`${portserver}/orders/return`, requestBody, {
             headers: {
                 "Content-Type": "application/json",
@@ -161,25 +161,31 @@ const Delivered = () => {
 
     const handleSubmit = (e: any) => {
         e.preventDefault();
-        try {
-            const reviewData = { productId: pro, userId: Number(decode?.userId), orderId: ord, rating, comment };
-            console.log(reviewData.productId)
-            console.log(reviewData.orderId)
-            axios.post(`${portserver}/reviews/reviewByProductId`,
-                reviewData,
-                {
-                    headers: {
-                        "Content-Type": "application/json",
-                        Authorization: `Bearer ${token}`
-                    }
+
+        const reviewData = { productId: pro, userId: Number(decode?.userId), orderId: ord, rating, comment };
+        axios.post(`${portserver}/reviews/reviewByProductId`,
+            reviewData,
+            {
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`
                 }
-            )
-                .then((res) => {
-                    console.log(res.data)
-                })
-        } catch (error) {
-            console.log(error)
-        }
+            }
+        )
+            .then((res) => {
+                toast.success(res.data.message)
+                setRating(0)
+                setComment('')
+                setPopReview(false)
+            })
+            .catch((e) => {
+                console.log(e)
+                toast.error(e.response.data.message)
+                setRating(0)
+                setComment('')
+                setPopReview(false)
+            })
+
     };
 
     return (
@@ -292,7 +298,7 @@ const Delivered = () => {
                     >
                         Submit Review
                     </Button>
-                    <Button onClick={() => setPopReview(false)} variant="outlined" color="secondary">
+                    <Button onClick={() => { setPopReview(false), setRating(0), setComment('') }} variant="outlined" color="secondary">
                         Cancel
                     </Button>
                 </DialogActions>
