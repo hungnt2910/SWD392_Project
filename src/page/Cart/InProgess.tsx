@@ -38,13 +38,14 @@ interface Order {
     shippingAddress: string;
     timestamp: string;
     orderDetails: OrderDetail[];
+    receiverName: string,
+    phoneNumber: number
 }
 
 const InProgess = () => {
     const [orders, setOrders] = useState<Order[]>([]);
     const token = localStorage.getItem('token');
     const decode = token ? jwtDecode<{ userId: number }>(token) : null;
-    const nav = useNavigate()
 
     useEffect(() => {
         const fetchOrders = async () => {
@@ -94,6 +95,8 @@ const InProgess = () => {
                                 <Grid container spacing={2}>
                                     <Grid item xs={12} md={6}>
                                         <Typography component='div'><strong>Status:</strong>  {getStatusChip(order.status)}</Typography>
+                                        <Typography><strong>Reciever Name: </strong> {order.receiverName}</Typography>
+                                        <Typography><strong>Phone Number:</strong> {order.phoneNumber}</Typography>
                                         <Typography><strong>Total:</strong> {formatMoney(order.amount)}</Typography>
                                         <Typography><strong>Shipping Address:</strong> {order.shippingAddress}</Typography>
                                         <Typography><strong>Date:</strong> {formatDate(order.timestamp)}</Typography>

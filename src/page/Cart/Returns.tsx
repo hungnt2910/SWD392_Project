@@ -12,7 +12,6 @@ import {
     TableRow,
     Paper,
     Grid,
-    Button,
     Chip
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
@@ -21,8 +20,6 @@ import { portserver } from "../../utils/portserver";
 import { jwtDecode } from "jwt-decode";
 import { Box } from "@mui/system";
 import { formatDate, formatMoney } from "../../utils/format";
-import { useNavigate } from "react-router-dom";
-import { MdOutlineDeliveryDining } from "react-icons/md";
 
 interface OrderDetail {
     orderDetailId: number;
@@ -38,15 +35,15 @@ interface Order {
     shippingAddress: string;
     timestamp: string;
     returnDetails: OrderDetail[];
+    receiverName: string,
+    phoneNumber: number
+
 }
 
 const Returns = () => {
     const [orders, setOrders] = useState<Order[]>([]);
     const token = localStorage.getItem('token');
     const decode = token ? jwtDecode<{ userId: number }>(token) : null;
-
-    console.log(decode)
-    const nav = useNavigate()
 
     useEffect(() => {
         const fetchOrders = async () => {
@@ -81,8 +78,6 @@ const Returns = () => {
         return <Chip label={status} color={color} sx={{ fontWeight: "bold", textTransform: "capitalize" }} />;
     };
 
-    console.log(orders)
-
     return (
         <Box sx={{ px: 3 }}>
 
@@ -98,6 +93,8 @@ const Returns = () => {
                                 <Grid container spacing={2}>
                                     <Grid item xs={12} md={6}>
                                         <Typography component='div'><strong>Status:</strong>  {getStatusChip(order.status)}</Typography>
+                                        <Typography><strong>Reciever Name: </strong> {order.receiverName}</Typography>
+                                        <Typography><strong>Phone Number:</strong> {order.phoneNumber}</Typography>
                                         <Typography><strong>Total:</strong> {formatMoney(order.amount)}</Typography>
                                         <Typography><strong>Shipping Address:</strong> {order.shippingAddress}</Typography>
                                         <Typography><strong>Date:</strong> {formatDate(order.timestamp)}</Typography>
