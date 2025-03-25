@@ -36,6 +36,7 @@ import Shipperlayout from "./page/Shipper/ShipperLayout";
 import ShipperReturns from "./page/Shipper/ShipperReturns";
 import Pending from "./page/Cart/Pending";
 import PostDetail from "./page/PostDetail";
+import SkincareRoute from "./dashboard/pages/staff/SkincareRoute";
 
 function App() {
   const ProtectRoute = ({ children, requireRoles }: { children: JSX.Element, requireRoles?: string[] }) => {
@@ -101,6 +102,7 @@ function App() {
           <Route path="blogs" element={<CheckLogin><ManageBlogs /></CheckLogin>} />
           <Route path="voucher" element={<CheckLogin><CreateVoucher /></CheckLogin>} />
           <Route path="meet" element={<CheckLogin><GGMeet /></CheckLogin>} />
+          <Route path="skincare-route" element={<CheckLogin><SkincareRoute /></CheckLogin>} />
         </Route>
 
         {/* Admin */}

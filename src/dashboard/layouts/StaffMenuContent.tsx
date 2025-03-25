@@ -28,8 +28,9 @@ const mainMenuItems = [
   { text: "Manage Reviews", path: "/staff/reviews", icon: <FeedbackIcon /> },
   { text: "Manage Blogs", path: "/staff/blogs", icon: <ArticleIcon /> },
   //   { text: "Customize Skin Route", path: "/dashboard/staff/skin-route", icon: <RouteIcon /> },
-    { text: "Create Voucher", path: "/staff/voucher", icon: <LocalOfferIcon /> },
-    { text: "Google Meet", path: "/staff/meet", icon: <VideoCall /> },
+  { text: "Create Voucher", path: "/staff/voucher", icon: <LocalOfferIcon /> },
+  { text: "Google Meet", path: "/staff/meet", icon: <VideoCall /> },
+  { text: "Skincare Route", path: "/staff/skincare-route", icon: <VideoCall /> },
 ];
 
 const orderSubMenuItems = [

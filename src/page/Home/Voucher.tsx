@@ -105,7 +105,13 @@ const Voucher: React.FC = () => {
     const fetchVouchers = async () => {
         try {
             const res = await axios.get(`${portserver}/voucher/get-all`);
-            setVouchers(res.data);
+            const currentDate = new Date(); // Lấy ngày hiện tại
+
+            // Lọc ra những voucher chưa hết hạn
+            const validVouchers = res.data.filter(voucher =>
+                new Date(voucher.expirationDate) >= currentDate
+            );
+            setVouchers(validVouchers);
         } catch (err) {
             console.error(err);
         }

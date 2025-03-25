@@ -73,7 +73,7 @@ const PostDetail: React.FC = () => {
                         />
                         <CardContent sx={{ padding: 3 }}>
                             <Typography variant="h4" sx={{ fontWeight: "bold", color: "#d81b60", mb: 2 }}>
-                                {post.title}
+                                {post.title.replace(/<[^>]*>/g, "")}
                             </Typography>
 
                             <Box sx={{ display: "flex", alignItems: "center", mb: 2, color: "#777" }}>
