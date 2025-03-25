@@ -74,15 +74,15 @@ const GGMeet = () => {
 
   const fetchMeetingLink = async (userId: string, staffId: string) => {
     try {
-      const response = await axios.post(`${portserver}/ggmeet/getMeet`,  { user_id: userId, staff_id: staffId }, {
-       
+      const response = await axios.post(`${portserver}/ggmeet/getMeet`, { user_id: userId, staff_id: staffId }, {
+
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
       console.log("Full API Response:", response.data); // Debugging
       if (typeof response.data !== "string") {
         console.error("Invalid link format:", response.data.link);
         return null;
-    }
+      }
       return response.data;
     } catch (error) {
       console.error("Error fetching meeting link:", error);
@@ -107,13 +107,16 @@ const GGMeet = () => {
 
   const handleJoinMeeting = async (meeting: Meeting) => {
     if (!staffId) {
-        console.error("Staff ID is missing.");
-        return;
+      console.error("Staff ID is missing.");
+      return;
+    }
+    if (meeting.staff) {
+      return
     }
 
     setSelectedMeeting(meeting);
     setOpenDialog(true);
-};
+  };
 
   console.log("Selected meeting:", selectedMeeting)
 
@@ -125,16 +128,16 @@ const GGMeet = () => {
     console.log("Meeting link:", link); // Debug
 
     if (link) {
-        window.open(
-            link.startsWith("http") ? link : `https://${link}`,
-            "_blank"
-        );
+      window.open(
+        link.startsWith("http") ? link : `https://${link}`,
+        "_blank"
+      );
     } else {
-        console.error("Failed to retrieve meeting link.");
+      console.error("Failed to retrieve meeting link.");
     }
 
     setOpenDialog(false);
-};
+  };
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString)
@@ -213,7 +216,7 @@ const GGMeet = () => {
                   </CardContent>
 
                   <CardActions>
-                    <Button
+                    {meeting.staff ? <></> : <><Button
                       variant="contained"
                       fullWidth
                       startIcon={<VideoCall />}
@@ -221,7 +224,7 @@ const GGMeet = () => {
                       sx={{ borderRadius: 2, py: 1 }}
                     >
                       Join Meeting
-                    </Button>
+                    </Button></>}
                   </CardActions>
                 </Card>
               </Grid>

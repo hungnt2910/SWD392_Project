@@ -48,6 +48,11 @@ const CreateVoucher = () => {
       return;
     }
 
+    if (!editingVoucherId && vouchers.some(voucher => voucher.code.toLowerCase() === code.toLowerCase())) {
+      setError('Voucher code must be unique');
+      return;
+  }
+
     setError('');
 
     const voucherData = {
