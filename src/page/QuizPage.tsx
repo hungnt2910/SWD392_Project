@@ -69,7 +69,7 @@ const QuizPage: React.FC = () => {
         axios.post(`${portserver}/quiz/${decode?.userId}`, formatedAns)
             .then(res => {
                 localStorage.setItem('skinTypeId', res.data.skinTypeId)
-                setResult(res.data.type)
+                setResult(res.data)
                 setTimeout(() => {
                     setIsLoading(false);
                     setOpenDialog(true);

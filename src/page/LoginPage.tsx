@@ -43,7 +43,7 @@ function LoginPage() {
             nav('/shipper')
         } else if (localStorage.getItem("token") && jwtDecode<{ role: string }>(localStorage.getItem("token")!)?.role === "Admin") {
             nav('/admin')
-        }else{
+        } else {
             nav('/')
         }
     };
@@ -58,6 +58,9 @@ function LoginPage() {
                         onClose: () => handleRole()
                     })
                     localStorage.setItem("token", res.data.accessToken)
+                    const decoded = jwtDecode<{ userId: number, skinType: number }>(res.data.accessToken);
+
+                    localStorage.setItem("skinTypeId", JSON.stringify(decoded.skinType));
                 } else {
                     toast.error("Login failed")
                 }

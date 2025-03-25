@@ -91,6 +91,10 @@ function QuizPro() {
         getProducts();
     }, [skinTypeId]);
 
+    const checkStock = (pro: Product) => {
+        return pro.stock < 5;
+    };
+
     return (
         <Box sx={{ px: 10, my: 3 }}>
 
@@ -134,12 +138,13 @@ function QuizPro() {
                                         <Button
                                             variant="contained"
                                             fullWidth
+                                            disabled={checkStock(item)}
                                             sx={{
                                                 borderRadius: "8px",
                                                 textTransform: "none",
                                                 fontSize: "1rem",
-                                                backgroundColor: "#F06292",
-                                                "&:hover": { backgroundColor: "#D81B60" }
+                                                backgroundColor: checkStock(item) ? "#BDBDBD" : "#F06292",
+                                                "&:hover": { backgroundColor: checkStock(item) ? "#BDBDBD" : "#D81B60" }
                                             }}
                                             onClick={() => addProduct({ productId: item.productId, productName: item.productName, price: item.price, quantity: 1 })}
                                         >

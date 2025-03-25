@@ -107,9 +107,8 @@ const ProductDetails = () => {
 
 
     const checkStock = (pro: Product | null) => {
-
-        console.log('pro', pro)
-        return pro ? pro.stock < 2 : false;
+        console.log('pro', pro?.stock)
+        return pro ? pro.stock < 3 : false;
     };
 
 
@@ -357,7 +356,7 @@ const ProductDetails = () => {
                         </Typography>
                     </DialogContent>
                 )}
-            </Dialog>;
+            </Dialog>
 
 
             <Dialog open={openCompareDialog} onClose={handleCloseCompareDialog} maxWidth="lg" fullWidth>
@@ -505,7 +504,7 @@ const ProductDetails = () => {
                         <Button
                             variant="contained"
                             startIcon={<ShoppingCartIcon />}
-                            disabled={isLoading}
+                            disabled={checkStock(product)}
                             onClick={() => product && addProduct({
                                 productId: product.productId,
                                 productName: product.productName,

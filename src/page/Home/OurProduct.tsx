@@ -41,7 +41,7 @@ function OurProduct() {
     }, []);
 
     const checkStock = (pro: Product) => {
-        return pro.stock < 3;
+        return pro.stock < 5;
     };
 
     return (
