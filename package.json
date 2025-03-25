@@ -10,6 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@ckeditor/ckeditor5-react": "^9.5.0",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.0",
     "@fontsource/roboto": "^5.1.1",
@@ -24,7 +25,12 @@
     "@mui/x-tree-view": "latest",
     "@react-spring/web": "latest",
     "axios": "^1.7.9",
+    "ckeditor5": "^44.3.0",
+    "ckeditor5-custom-build": "^0.0.6",
+    "ckeditor5-custom-project": "file:ckeditor5",
+    "ckeditor5-premium-features": "^44.3.0",
     "clsx": "latest",
+    "date-fns": "^2.30.0",
     "dayjs": "latest",
     "framer-motion": "^12.4.10",
     "jwt-decode": "^4.0.0",

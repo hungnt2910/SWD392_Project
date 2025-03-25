@@ -28,7 +28,7 @@ import ClearIcon from "@mui/icons-material/Clear";
 import IconButtonBase from "@mui/material/IconButton";
 import ProductDetailDialog from "./ProductDetailDialog";
 import AddProductDialog from "./AddProductDialog";
-
+import EditProductDialog from "./EditProductDialog"; 
 
 interface Product {
   productId: number;
@@ -38,8 +38,20 @@ interface Product {
   isActive: boolean;
   createdAt: string;
   stock: number;
-}
+  urlImage: string;
+  category: Category;
+  brand: Brand;
+  brandName: string;
+  categoryName: string;
+  productDetails?: ProductDetail[]; 
 
+}
+interface ProductDetail {
+  id: number;
+  productionDate: string;
+  expirationDate: string;
+  quantity: number;
+}
 interface Brand {
   brandId: number;
   brandName: string;
@@ -48,10 +60,16 @@ interface Brand {
   createdAt: string;
   isActive: boolean;
 }
-
+interface Category {
+  categoryId: number;
+  name: string;
+  isActive: boolean;
+  createdAt: string;
+}
 export default function ManageGoods() {
   const [addDialogOpen, setAddDialogOpen] = useState<boolean>(false);
-
+  const [editDialogOpen, setEditDialogOpen] = useState<boolean>(false); 
+  const [editProductId, setEditProductId] = useState<number | null>(null); 
   const [selectedBrand, setSelectedBrand] = useState<string>("");
   const [brands, setBrands] = useState<Brand[]>([]);
   const [loadingBrands, setLoadingBrands] = useState<boolean>(false);
@@ -74,10 +92,11 @@ export default function ManageGoods() {
   const handleCloseAddDialog = () => {
     setAddDialogOpen(false);
   };
-  
-  const handleViewProduct = (id: number) => {
+
+  const handleViewProduct = async (id: number) => {
     console.log("View product clicked:", id);
-    const product = products.find((p) => p.productId === id);
+    const response = await axios.get(`${portserver}/skincare-product/${id}`);
+    const product = response.data;
     console.log("Found product:", product);
     setSelectedProduct(product || null);
     setDetailDialogOpen(true);
@@ -109,33 +128,7 @@ export default function ManageGoods() {
         setBrands(response.data);
       } catch (err) {
         console.error("Error fetching brands:", err);
-        // Mock data if API fails
-        setBrands([
-          {
-            brandId: 1,
-            brandName: "Klairs",
-            country: "South Korea",
-            logo: "https://example.com/klairs.png",
-            createdAt: "2025-02-28T18:01:05.000Z",
-            isActive: true,
-          },
-          {
-            brandId: 2,
-            brandName: "COSRX",
-            country: "South Korea",
-            logo: "https://example.com/cosrx.png",
-            createdAt: "2025-02-28T18:01:05.000Z",
-            isActive: true,
-          },
-          {
-            brandId: 3,
-            brandName: "Innisfree",
-            country: "South Korea",
-            logo: "https://example.com/innisfree.png",
-            createdAt: "2025-02-28T18:01:05.000Z",
-            isActive: true,
-          },
-        ]);
+        setError("Failed to load brands. Please try again later.");
       } finally {
         setLoadingBrands(false);
       }
@@ -151,8 +144,7 @@ export default function ManageGoods() {
 
       if (selectedBrand) {
         url = `${portserver}/skincare-product/brand/${selectedBrand}`;
-      }
-      else if (searchTerm) {
+      } else if (searchTerm) {
         url = `${portserver}/skincare-product/search/byname?productname=${encodeURIComponent(
           searchTerm
         )}`;
@@ -172,7 +164,7 @@ export default function ManageGoods() {
 
   useEffect(() => {
     fetchProducts();
-  }, [selectedBrand]); // Only re-fetch automatically when brand changes
+  }, [selectedBrand]); 
 
   const toggleProductStatus = async (id: number) => {
     try {
@@ -203,23 +195,31 @@ export default function ManageGoods() {
   };
 
   const handleEditProduct = (id: number) => {
-    console.log(`Edit product with ID: ${id}`);
+    setEditProductId(id);
+    setEditDialogOpen(true);
   };
 
+  const handleCloseEditDialog = () => {
+    setEditDialogOpen(false);
+    setEditProductId(null);
+  };
 
-  const formatPrice = (price: any) => {
-    if (!price && price !== 0) return "$0.00";
-    
+  const formatPrice = (price: number) => {
+    if (!price && price !== 0) return "0 ₫";
+
     try {
-      return "$" + Number(price).toFixed(2);
+      return new Intl.NumberFormat("vi-VN", {
+        style: "currency",
+        currency: "VND",
+        maximumFractionDigits: 0,
+      }).format(price);
     } catch {
-      return "$0.00";
+      return "0 ₫";
     }
   };
-
   const formatDate = (dateString: string) => {
     if (!dateString) return "N/A";
-    
+
     try {
       const date = new Date(dateString);
       return date.toLocaleDateString("en-US", {
@@ -309,6 +309,7 @@ export default function ManageGoods() {
       editable: false,
       headerAlign: "center",
       align: "center",
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       renderCell: (params: GridRenderCellParams<any, boolean>) => (
         <Chip
           label={params.value ? "Active" : "Inactive"}
@@ -327,49 +328,64 @@ export default function ManageGoods() {
       headerAlign: "center",
       align: "center",
       renderCell: (params) => (
-        <Stack direction="row" spacing={1} justifyContent="center">
-          <Tooltip title="View Details">
-            <IconButton
-              color="info"
-              onClick={() => handleViewProduct(params.row.productId)}
-              size="small"
-            >
-              <VisibilityIcon fontSize="small" />
-            </IconButton>
-          </Tooltip>
-
-          <Tooltip title="Edit Product">
-            <IconButton
-              color="primary"
-              onClick={() => handleEditProduct(params.row.productId)}
-              size="small"
-            >
-              <EditIcon fontSize="small" />
-            </IconButton>
-          </Tooltip>
-
-          {params.row.isActive ? (
-            <Tooltip title="Deactivate Product">
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            width: "100%",
+            height: "100%",
+          }}
+        >
+          <Stack
+            direction="row"
+            spacing={1}
+            alignItems="center"
+            justifyContent="center"
+          >
+            <Tooltip title="View Details">
               <IconButton
-                color="error"
-                onClick={() => toggleProductStatus(params.row.productId)}
+                color="info"
+                onClick={() => handleViewProduct(params.row.productId)}
                 size="small"
               >
-                <BlockIcon fontSize="small" />
+                <VisibilityIcon fontSize="small" />
               </IconButton>
             </Tooltip>
-          ) : (
-            <Tooltip title="Activate Product">
+
+            <Tooltip title="Edit Product">
               <IconButton
-                color="success"
-                onClick={() => toggleProductStatus(params.row.productId)}
+                color="primary"
+                onClick={() => handleEditProduct(params.row.productId)}
                 size="small"
               >
-                <CheckCircleIcon fontSize="small" />
+                <EditIcon fontSize="small" />
               </IconButton>
             </Tooltip>
-          )}
-        </Stack>
+
+            {params.row.isActive ? (
+              <Tooltip title="Deactivate Product">
+                <IconButton
+                  color="error"
+                  onClick={() => toggleProductStatus(params.row.productId)}
+                  size="small"
+                >
+                  <BlockIcon fontSize="small" />
+                </IconButton>
+              </Tooltip>
+            ) : (
+              <Tooltip title="Activate Product">
+                <IconButton
+                  color="success"
+                  onClick={() => toggleProductStatus(params.row.productId)}
+                  size="small"
+                >
+                  <CheckCircleIcon fontSize="small" />
+                </IconButton>
+              </Tooltip>
+            )}
+          </Stack>
+        </Box>
       ),
     },
   ];
@@ -408,14 +424,13 @@ export default function ManageGoods() {
         sx={{
           display: "flex",
           flexDirection: "row",
-          flexWrap: "wrap", 
+          flexWrap: "wrap",
           gap: 2,
           mb: 3,
         }}
       >
         <Box sx={{ display: "flex", flexGrow: 1, minWidth: 250 }}>
           <TextField
-            label="Search Products"
             variant="outlined"
             size="small"
             value={searchTerm}
@@ -528,10 +543,18 @@ export default function ManageGoods() {
         onClose={handleCloseDetailDialog}
         product={selectedProduct}
       />
-      <AddProductDialog 
+      <AddProductDialog
         open={addDialogOpen}
         onClose={handleCloseAddDialog}
         onProductAdded={fetchProducts}
+      />
+
+      {/* Add EditProductDialog */}
+      <EditProductDialog
+        open={editDialogOpen}
+        onClose={handleCloseEditDialog}
+        onProductUpdated={fetchProducts}
+        productId={editProductId}
       />
     </Box>
   );

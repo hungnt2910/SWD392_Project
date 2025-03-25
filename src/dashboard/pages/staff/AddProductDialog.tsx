@@ -6,53 +6,43 @@ import DialogContent from "@mui/material/DialogContent";
 import DialogActions from "@mui/material/DialogActions";
 import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
-import FormControl from "@mui/material/FormControl";
-import InputLabel from "@mui/material/InputLabel";
-import MenuItem from "@mui/material/MenuItem";
-import Select from "@mui/material/Select";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import InputAdornment from "@mui/material/InputAdornment";
 import CircularProgress from "@mui/material/CircularProgress";
 import Alert from "@mui/material/Alert";
-import Switch from "@mui/material/Switch";
-import FormControlLabel from "@mui/material/FormControlLabel";
 import Stack from "@mui/material/Stack";
 import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
-import { DataGrid, GridColDef, GridRenderCellParams } from '@mui/x-data-grid';
-import Chip from "@mui/material/Chip";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import { styled } from "@mui/material/styles";
-
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import MenuItem from "@mui/material/MenuItem";
 import axios from "axios";
 import { portserver } from "../../../utils/portserver";
 
-const VisuallyHiddenInput = styled('input')({
-  clip: 'rect(0 0 0 0)',
-  clipPath: 'inset(50%)',
+const VisuallyHiddenInput = styled("input")({
+  clip: "rect(0 0 0 0)",
+  clipPath: "inset(50%)",
   height: 1,
-  overflow: 'hidden',
-  position: 'absolute',
+  overflow: "hidden",
+  position: "absolute",
   bottom: 0,
   left: 0,
-  whiteSpace: 'nowrap',
+  whiteSpace: "nowrap",
   width: 1,
 });
 
 interface Brand {
-  id: number;
   brandId: number;
   brandName: string;
-  country: string;
-  logo?: string;
-  isActive: boolean;
 }
 
 interface Category {
-  id: number;
   categoryId: number;
-  categoryName: string;
+  name: string;
   isActive: boolean;
 }
 
@@ -73,11 +63,7 @@ function TabPanel(props: TabPanelProps) {
       aria-labelledby={`product-tab-${index}`}
       {...other}
     >
-      {value === index && (
-        <Box sx={{ pt: 2 }}>
-          {children}
-        </Box>
-      )}
+      {value === index && <Box sx={{ pt: 2 }}>{children}</Box>}
     </div>
   );
 }
@@ -97,68 +83,64 @@ export default function AddProductDialog({
     productName: "",
     description: "",
     price: "",
-    stock: "",
-    brandId: "",
-    categoryIds: [] as string[],
-    isActive: true,
-    imageUrl: "",
+    categoryId: 1,
+    brandId: 1,
+    urlImage: "",
+    quantity: "",
+    productionDate: null as Date | null,
+    expirationDate: null as Date | null,
   });
 
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
-  
-  const [brands, setBrands] = useState<Brand[]>([]);
-  const [categories, setCategories] = useState<Category[]>([]);
+  const [brands, setBrands] = useState<Brand[]>([
+    { brandId: 1, brandName: "Default Brand" },
+  ]);
+  const [categories, setCategories] = useState<Category[]>([
+    { categoryId: 1, name: "Default Category", isActive: true },
+  ]);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
-  
-  // Tab state
   const [tabValue, setTabValue] = useState(0);
-  
-  // Handle tab change
+
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
     setTabValue(newValue);
   };
-  
-  // Fetch brands and categories when dialog opens
+
   useEffect(() => {
     if (open) {
       fetchBrands();
       fetchCategories();
     }
   }, [open]);
-  
+
   const fetchBrands = async () => {
     try {
       const response = await axios.get(`${portserver}/brand`);
-      // Add id property for DataGrid
-      const brandsWithId = response.data.map((brand: any, index: number) => ({
-        ...brand,
-        id: brand.brandId || index,
-      }));
-      setBrands(brandsWithId);
+      setBrands(response.data);
     } catch (err) {
       console.error("Error fetching brands:", err);
-      setBrands([]);
+      setBrands([{ brandId: 1, brandName: "Default Brand" }]);
     }
   };
-  
+
   const fetchCategories = async () => {
     try {
       const response = await axios.get(`${portserver}/category`);
-      const categoriesWithId = response.data.map((category: any, index: number) => ({
-        ...category,
-        id: category.categoryId || index,
-      }));
-      setCategories(categoriesWithId);
+      console.log("Categories fetched:", response.data);
+      setCategories(response.data);
     } catch (err) {
       console.error("Error fetching categories:", err);
-      setCategories([]);
+      setCategories([
+        { categoryId: 1, name: "Default Category", isActive: true },
+      ]);
     }
   };
-  
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | { name?: string; value: unknown }>) => {
+
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | { name?: string; value: unknown }>
+  ) => {
     const { name, value } = e.target;
     if (name) {
       setProductData({
@@ -167,44 +149,12 @@ export default function AddProductDialog({
       });
     }
   };
-  
-  const handleSwitchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setProductData({
-      ...productData,
-      isActive: e.target.checked,
-    });
-  };
-  
-  const handleBrandSelection = (brandId: number) => {
-    setProductData({
-      ...productData,
-      brandId: String(brandId),
-    });
-  };
-  
-  const handleCategorySelection = (categoryId: number) => {
-    const currentCategoryIds = [...productData.categoryIds];
-    const categoryIdString = String(categoryId);
-    
-    // Toggle selection
-    if (currentCategoryIds.includes(categoryIdString)) {
-      setProductData({
-        ...productData,
-        categoryIds: currentCategoryIds.filter(id => id !== categoryIdString),
-      });
-    } else {
-      setProductData({
-        ...productData,
-        categoryIds: [...currentCategoryIds, categoryIdString],
-      });
-    }
-  };
-  
+
   const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files[0]) {
       const file = event.target.files[0];
       setSelectedFile(file);
-      
+
       const reader = new FileReader();
       reader.onload = () => {
         setImagePreview(reader.result as string);
@@ -212,73 +162,84 @@ export default function AddProductDialog({
       reader.readAsDataURL(file);
     }
   };
-  
-  const uploadImage = async (): Promise<string> => {
-    if (!selectedFile) return "";
-    
-    try {
-      const formData = new FormData();
-      formData.append('image', selectedFile);
-      
-      // image handle
-      return URL.createObjectURL(selectedFile);
-    } catch (error) {
-      console.error("Error uploading image:", error);
-      return "";
-    }
-  };
-  
+
   const handleSubmit = async () => {
     if (!productData.productName.trim()) {
       setError("Product name is required");
       return;
     }
-    
-    if (!productData.brandId) {
-      setError("Brand is required");
-      return;
-    }
-    
-    if (productData.categoryIds.length === 0) {
-      setError("At least one category is required");
-      return;
-    }
-    
-    if (!productData.price || isNaN(Number(productData.price)) || Number(productData.price) <= 0) {
+
+    if (
+      !productData.price ||
+      isNaN(Number(productData.price)) ||
+      Number(productData.price) <= 0
+    ) {
       setError("Valid price is required");
       return;
     }
-    
-    if (!productData.stock || isNaN(Number(productData.stock)) || Number(productData.stock) < 0) {
-      setError("Valid stock quantity is required");
+
+    if (
+      !productData.quantity ||
+      isNaN(Number(productData.quantity)) ||
+      Number(productData.quantity) < 0
+    ) {
+      setError("Valid quantity is required");
       return;
     }
-    
+
+    if (!productData.productionDate) {
+      setError("Production date is required");
+      return;
+    }
+
+    if (!productData.expirationDate) {
+      setError("Expiration date is required");
+      return;
+    }
+
+    if (productData.productionDate >= productData.expirationDate) {
+      setError("Production date must be before expiration date");
+      return;
+    }
+
     setLoading(true);
     setError(null);
-    
+
     try {
-      let imageUrl = "";
-      if (selectedFile) {
-        imageUrl = await uploadImage();
+      const token = localStorage.getItem("token");
+      if (!token) {
+        setError("Authentication token not found. Please login again.");
+        setLoading(false);
+        return;
       }
-      
+
+      const fixedImageUrl =
+        "https://www.guardian.com.vn/media/catalog/product/cache/30b2b44eba57cd45fd3ef9287600968e/3/0/3024391_jmlxr3jmjjvendjl.jpg";
+
       const payload = {
         productName: productData.productName,
-        description: productData.description,
-        price: Number(productData.price),
-        stock: Number(productData.stock),
-        brandId: Number(productData.brandId),
-        categoryIds: productData.categoryIds.map(id => Number(id)),
-        isActive: productData.isActive,
-        imageUrl: imageUrl || undefined
+        categoryId: productData.categoryId,
+        brandId: productData.brandId,
+        description: productData.description || "",
+        price: parseFloat(productData.price),
+        urlImage: fixedImageUrl, // Luôn sử dụng URL ảnh cố định
+        productionDate: productData.productionDate?.toISOString().split("T")[0],
+        expirationDate: productData.expirationDate?.toISOString().split("T")[0],
+        quantity: parseInt(productData.quantity),
       };
-      
-      await axios.post(`${portserver}/skincare-product`, payload);
-      
+
+      console.log("Sending payload to API:", payload);
+
+      await axios.post(`${portserver}/skincare-product/add-product`, payload, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+
       setSuccess("Product added successfully!");
       setLoading(false);
-      
+
       setTimeout(() => {
         onProductAdded();
         handleClose();
@@ -289,17 +250,18 @@ export default function AddProductDialog({
       setLoading(false);
     }
   };
-  
+
   const handleClose = () => {
     setProductData({
       productName: "",
       description: "",
       price: "",
-      stock: "",
-      brandId: "",
-      categoryIds: [],
-      isActive: true,
-      imageUrl: "",
+      categoryId: 1,
+      brandId: 1,
+      urlImage: "",
+      quantity: "",
+      productionDate: null,
+      expirationDate: null,
     });
     setSelectedFile(null);
     setImagePreview(null);
@@ -308,119 +270,105 @@ export default function AddProductDialog({
     setTabValue(0);
     onClose();
   };
-  
-  const brandColumns: GridColDef[] = [
-    {
-      field: 'brandName',
-      headerName: 'Brand Name',
-      flex: 2,
-    },
-    {
-      field: 'country',
-      headerName: 'Country',
-      flex: 1,
-    },
-    {
-      field: 'isActive',
-      headerName: 'Status',
-      flex: 1,
-      renderCell: (params: GridRenderCellParams<any, boolean>) => (
-        <Chip
-          label={params.value ? "Active" : "Inactive"}
-          color={params.value ? "success" : "error"}
-          size="small"
-        />
-      ),
-    },
-  ];
-  
-  const categoryColumns: GridColDef[] = [
-    {
-      field: 'categoryName',
-      headerName: 'Category Name',
-      flex: 3,
-    },
-    {
-      field: 'isActive',
-      headerName: 'Status',
-      flex: 1,
-      renderCell: (params: GridRenderCellParams<any, boolean>) => (
-        <Chip
-          label={params.value ? "Active" : "Inactive"}
-          color={params.value ? "success" : "error"}
-          size="small"
-        />
-      ),
-    },
-  ];
-  
-  // Determine selected rows for brand
-  const selectedBrandId = productData.brandId ? Number(productData.brandId) : null;
-  
-  // Determine selected rows for categories
-  const selectedCategoryIds = productData.categoryIds.map(id => Number(id));
-  
+
   return (
-    <Dialog 
-      open={open} 
-      onClose={handleClose} 
-      maxWidth="md" 
-      fullWidth
+    <Dialog
+      open={open}
+      onClose={handleClose}
+      maxWidth="md"
+      fullWidth={false}
       PaperProps={{
-        sx: { borderRadius: 2 }
+        sx: {
+          borderRadius: 2,
+          width: "600px",
+          maxHeight: "80vh",
+        },
       }}
     >
-      <DialogTitle sx={{ pb: 1 }}>
+      <DialogTitle>
         <Typography variant="h5" fontWeight="bold">
           Add New Product
         </Typography>
       </DialogTitle>
-      
+
       <DialogContent dividers>
         {error && (
           <Alert severity="error" sx={{ mb: 2 }}>
             {error}
           </Alert>
         )}
-        
+
         {success && (
           <Alert severity="success" sx={{ mb: 2 }}>
             {success}
           </Alert>
         )}
-        
-        <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-          <Tabs value={tabValue} onChange={handleTabChange} aria-label="product tabs">
+
+        <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
+          <Tabs value={tabValue} onChange={handleTabChange}>
             <Tab label="Basic Info" />
-            <Tab label="Brand & Categories" />
             <Tab label="Image" />
           </Tabs>
         </Box>
-        
+
         <TabPanel value={tabValue} index={0}>
-          <Stack spacing={2}>
-            <TextField
-              name="productName"
-              label="Product Name"
-              fullWidth
-              required
-              value={productData.productName}
-              onChange={handleChange}
-              variant="outlined"
-            />
-            
-            <TextField
-              name="description"
-              label="Description"
-              fullWidth
-              multiline
-              rows={3}
-              value={productData.description}
-              onChange={handleChange}
-              variant="outlined"
-            />
-            
-            <Stack direction="row" spacing={2}>
+          <LocalizationProvider dateAdapter={AdapterDateFns}>
+            <Stack spacing={2}>
+              <TextField
+                name="productName"
+                label="Product Name"
+                fullWidth
+                required
+                value={productData.productName}
+                onChange={handleChange}
+              />
+
+              <TextField
+                name="description"
+                label="Description"
+                fullWidth
+                multiline
+                value={productData.description}
+                onChange={handleChange}
+              />
+
+              <TextField
+                name="brandId"
+                select
+                fullWidth
+                required
+                label="Brand"
+                value={productData.brandId}
+                onChange={handleChange}
+              >
+                {brands.map((brand) => (
+                  <MenuItem key={brand.brandId} value={brand.brandId}>
+                    {brand.brandName}
+                  </MenuItem>
+                ))}
+              </TextField>
+
+              <TextField
+                name="categoryId"
+                select
+                fullWidth
+                required
+                label="Category"
+                value={productData.categoryId}
+                onChange={handleChange}
+              >
+                {categories.map((category) => (
+                  <MenuItem
+                    key={category.categoryId}
+                    value={category.categoryId}
+                    disabled={!category.isActive}
+                  >
+                    {category.name}
+                    {!category.isActive && " (Inactive)"}
+                  </MenuItem>
+                ))}
+              </TextField>
+
               <TextField
                 name="price"
                 label="Price"
@@ -430,173 +378,108 @@ export default function AddProductDialog({
                 value={productData.price}
                 onChange={handleChange}
                 InputProps={{
-                  startAdornment: <InputAdornment position="start">$</InputAdornment>,
+                  startAdornment: (
+                    <InputAdornment position="start">VND</InputAdornment>
+                  ),
                 }}
-                variant="outlined"
               />
-              
+
               <TextField
-                name="stock"
-                label="Stock Quantity"
+                name="quantity"
+                label="Quantity"
                 type="number"
                 fullWidth
                 required
-                value={productData.stock}
+                value={productData.quantity}
                 onChange={handleChange}
-                variant="outlined"
+              />
+
+              <DatePicker
+                label="Production Date *"
+                value={productData.productionDate}
+                onChange={(newValue) => {
+                  setProductData({
+                    ...productData,
+                    productionDate: newValue,
+                  });
+                }}
+                slotProps={{
+                  textField: {
+                    fullWidth: true,
+                    required: true,
+                  },
+                }}
+              />
+
+              <DatePicker
+                label="Expiration Date *"
+                value={productData.expirationDate}
+                onChange={(newValue) => {
+                  setProductData({
+                    ...productData,
+                    expirationDate: newValue,
+                  });
+                }}
+                slotProps={{
+                  textField: {
+                    fullWidth: true,
+                    required: true,
+                  },
+                }}
               />
             </Stack>
-            
-            <Box sx={{ mt: 1 }}>
-              <FormControlLabel 
-                control={
-                  <Switch 
-                    checked={productData.isActive}
-                    onChange={handleSwitchChange}
-                    color="success"
-                  />
-                } 
-                label="Product is active" 
-              />
-              <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.5 }}>
-                Active products are visible to customers and can be purchased.
-              </Typography>
-            </Box>
-          </Stack>
+          </LocalizationProvider>
         </TabPanel>
-        
+
         <TabPanel value={tabValue} index={1}>
-          <Stack spacing={3}>
-            <Box>
-              <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
-                Select Brand
-              </Typography>
-              <Typography variant="caption" color="text.secondary" paragraph>
-                Click on a row to select a brand.
-              </Typography>
-              <Box sx={{ height: 300, width: '100%' }}>
-                <DataGrid
-                  rows={brands}
-                  columns={brandColumns}
-                  hideFooterPagination={brands.length <= 10}
-                  disableRowSelectionOnClick={false}
-                  onRowClick={(params) => handleBrandSelection(params.row.brandId)}
-                  getRowClassName={(params) => 
-                    selectedBrandId === params.row.brandId ? 'Mui-selected' : ''
-                  }
-                  sx={{
-                    '& .Mui-selected': {
-                      backgroundColor: 'action.selected',
-                      '&:hover': {
-                        backgroundColor: 'action.hover',
-                      },
-                    },
-                  }}
-                />
-              </Box>
-            </Box>
-            
-            <Box>
-              <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
-                Select Categories
-              </Typography>
-              <Typography variant="caption" color="text.secondary" paragraph>
-                Click on rows to select multiple categories.
-              </Typography>
-              <Box sx={{ height: 300, width: '100%' }}>
-                <DataGrid
-                  rows={categories}
-                  columns={categoryColumns}
-                  hideFooterPagination={categories.length <= 10}
-                  disableRowSelectionOnClick={false}
-                  onRowClick={(params) => handleCategorySelection(params.row.categoryId)}
-                  getRowClassName={(params) => 
-                    selectedCategoryIds.includes(params.row.categoryId) ? 'Mui-selected' : ''
-                  }
-                  sx={{
-                    '& .Mui-selected': {
-                      backgroundColor: 'action.selected',
-                      '&:hover': {
-                        backgroundColor: 'action.hover',
-                      },
-                    },
-                  }}
-                />
-              </Box>
-              
-              <Box sx={{ mt: 2 }}>
-                <Typography variant="subtitle2" gutterBottom>
-                  Selected Categories:
-                </Typography>
-                <Stack direction="row" spacing={1} flexWrap="wrap">
-                  {selectedCategoryIds.length > 0 ? (
-                    selectedCategoryIds.map(id => {
-                      const category = categories.find(cat => cat.categoryId === id);
-                      return category ? (
-                        <Chip 
-                          key={id} 
-                          label={category.categoryName} 
-                          color="primary" 
-                          variant="outlined" 
-                          size="small"
-                          onDelete={() => handleCategorySelection(id)}
-                        />
-                      ) : null;
-                    })
-                  ) : (
-                    <Typography variant="body2" color="text.secondary">No categories selected</Typography>
-                  )}
-                </Stack>
-              </Box>
-            </Box>
-          </Stack>
-        </TabPanel>
-        
-        <TabPanel value={tabValue} index={2}>
-          <Box 
-            sx={{ 
-              display: 'flex', 
-              flexDirection: 'column', 
-              alignItems: 'center',
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
               p: 3,
-              border: '1px dashed',
-              borderColor: 'divider',
+              border: "1px dashed",
+              borderColor: "divider",
               borderRadius: 1,
             }}
           >
             {imagePreview ? (
               <Box sx={{ mb: 2 }}>
-                <img 
-                  src={imagePreview} 
-                  alt="Product preview" 
-                  style={{ maxWidth: '100%', maxHeight: 300, objectFit: 'contain' }}
+                <img
+                  src={imagePreview}
+                  alt="Product preview"
+                  style={{
+                    maxWidth: "100%",
+                    maxHeight: 250,
+                    objectFit: "contain",
+                  }}
                 />
               </Box>
             ) : (
-              <Box sx={{ mb: 2, textAlign: 'center' }}>
+              <Box sx={{ mb: 2, textAlign: "center", py: 3 }}>
                 <Typography color="text.secondary">
                   No image selected
                 </Typography>
               </Box>
             )}
-            
+
             <Button
               component="label"
               variant="outlined"
               startIcon={<CloudUploadIcon />}
             >
-              {imagePreview ? 'Change Image' : 'Upload Image'}
-              <VisuallyHiddenInput 
-                type="file" 
-                accept="image/*" 
+              {imagePreview ? "Change Image" : "Upload Image"}
+              <VisuallyHiddenInput
+                type="file"
+                accept="image/*"
                 onChange={handleImageChange}
               />
             </Button>
-            
+
             {imagePreview && (
-              <Button 
-                variant="text" 
-                color="error" 
+              <Button
+                variant="text"
+                color="error"
                 sx={{ mt: 1 }}
                 onClick={() => {
                   setSelectedFile(null);
@@ -609,18 +492,18 @@ export default function AddProductDialog({
           </Box>
         </TabPanel>
       </DialogContent>
-      
+
       <DialogActions sx={{ px: 3, py: 2 }}>
         <Button variant="outlined" onClick={handleClose}>
           Cancel
         </Button>
-        <Button 
-          variant="contained" 
-          onClick={handleSubmit} 
+        <Button
+          variant="contained"
+          onClick={handleSubmit}
           disabled={loading}
           startIcon={loading && <CircularProgress size={20} />}
         >
-          {loading ? 'Adding...' : 'Add Product'}
+          {loading ? "Adding..." : "Add Product"}
         </Button>
       </DialogActions>
     </Dialog>

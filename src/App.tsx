@@ -17,6 +17,14 @@ import CartLayout from "./page/Cart/CartLayout";
 import DashboardLayout from "./dashboard/layouts/DashboardLayout";
 import ManageGoods from "./dashboard/pages/staff/ManageGoods";
 import ManageMembers from "./dashboard/pages/staff/ManageMembers";
+import OrderList from "./dashboard/pages/staff/OrderList";
+import OrderConfirm from "./dashboard/pages/staff/OrderConfirm";
+import OrderRefund from "./dashboard/pages/staff/OrderRefund";
+import ManageReviews from "./dashboard/pages/staff/ManageReviews";
+import ManageBlogs from "./dashboard/pages/staff/ManageBlogs";
+import CreateVoucher from "./dashboard/pages/staff/CreateVoucher";
+import Dashboard from "./dashboard/pages/admin/Dashboard";
+import ManageUsers from "./dashboard/pages/admin/ManageUsers";
 import SkincareRoutine from "./page/SkincareRoutine";
 import Order from "./page/Cart/Order";
 import Shipper from './page/Shipper/Shipper'
@@ -85,6 +93,23 @@ function App() {
           <Route index element={<Navigate to="members" replace />} />
           <Route path="goods" element={<CheckLogin><ManageGoods /></CheckLogin>} />
           <Route path="members" element={<CheckLogin><ManageMembers /></CheckLogin>} />
+          <Route path="orders/all" element={<CheckLogin><OrderList /></CheckLogin>} />
+          <Route path="orders/confirm" element={<CheckLogin><OrderConfirm /></CheckLogin>} />
+          <Route path="orders/refund" element={<CheckLogin><OrderRefund /></CheckLogin>} />
+          <Route path="reviews" element={<CheckLogin><ManageReviews /></CheckLogin>} />
+          <Route path="blogs" element={<CheckLogin><ManageBlogs /></CheckLogin>} />
+          <Route path="voucher" element={<CheckLogin><CreateVoucher /></CheckLogin>} />
+        </Route>
+
+        {/* Admin */}
+        <Route path="/admin" element={
+          <ProtectRoute requireRoles={["Admin"]} >
+            <DashboardLayout />
+          </ProtectRoute>
+        }>
+          <Route index element={<Navigate to="dashboard" replace />} />
+          <Route path="dashboard" element={<CheckLogin><Dashboard /></CheckLogin>} />
+          <Route path="users" element={<CheckLogin><ManageUsers /></CheckLogin>} />
         </Route>
 
         <Route path="*" element={<NotFoundPage />} />
