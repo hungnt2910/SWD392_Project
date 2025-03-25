@@ -11,6 +11,7 @@ import { ArrowBackIos, ArrowForwardIos } from "@mui/icons-material";
 import { formatMoney } from "../../utils/format";
 import { portserver } from "../../utils/portserver";
 import { useCart } from "../../hooks/useCart";
+import { jwtDecode } from "jwt-decode";
 
 const PrevArrow = ({ onClick }: { onClick?: () => void }) => (
     <IconButton
@@ -59,7 +60,9 @@ function QuizPro() {
     const [products, setProducts] = useState<Product[] | null>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const nav = useNavigate();
-    const skinTypeId = localStorage.getItem('skinTypeId')
+    const token = localStorage.getItem('token');
+    const decode = token ? jwtDecode<{ skinType: number }>(token) : null;
+    const skinTypeId = decode?.skinType || localStorage.getItem('skinTypeId')
     const { addProduct } = useCart();
 
     const settings = {

@@ -106,6 +106,13 @@ const ProductDetails = () => {
 
 
 
+    const checkStock = (pro: Product | null) => {
+
+        console.log('pro', pro)
+        return pro ? pro.stock < 2 : false;
+    };
+
+
     const settings = {
         dots: false,
         infinite: true,
@@ -174,6 +181,8 @@ const ProductDetails = () => {
             console.error(err);
         }
     }
+
+    console.log(product)
 
     return (
         <Container maxWidth="lg" sx={{ mt: 4 }}>
@@ -504,11 +513,11 @@ const ProductDetails = () => {
                                 quantity: 1
                             })}
                             sx={{
-                                backgroundColor: "#F06292",
+                                backgroundColor: checkStock(product) ? "#BDBDBD" : "#F06292",
                                 borderRadius: "8px",
                                 textTransform: "none",
                                 fontSize: "1rem",
-                                "&:hover": { backgroundColor: "#D81B60" }
+                                "&:hover": { backgroundColor: checkStock(product) ? "#BDBDBD" : "#D81B60" }
                             }}
                         >
                             Buy Now
@@ -585,13 +594,14 @@ const ProductDetails = () => {
                                                 <Button
                                                     variant="contained"
                                                     fullWidth
+                                                    disabled={checkStock(item)}
                                                     onClick={() => addProduct({ productId: item.productId, productName: item.productName, price: item.price, quantity: 1 })}
                                                     sx={{
                                                         borderRadius: "8px",
                                                         textTransform: "none",
                                                         fontSize: "1rem",
-                                                        backgroundColor: "#F06292",
-                                                        "&:hover": { backgroundColor: "#D81B60" }
+                                                        backgroundColor: checkStock(item) ? "#BDBDBD" : "#F06292",
+                                                        "&:hover": { backgroundColor: checkStock(item) ? "#BDBDBD" : "#D81B60" }
                                                     }}
                                                 >
                                                     Buy Now
@@ -619,8 +629,8 @@ const ProductDetails = () => {
                             {reviews?.length === 0 ? (
                                 <Typography variant="body1" sx={{ color: '#333', textAlign: 'center' }}>No reviews yet</Typography>
                             ) : (
-                                reviews?.map((review) => (
-                                    <Box sx={{ border: '1px solid #D81B60', p: 2, borderRadius: '16px', width: '100%', mb: 3 }}>
+                                reviews?.map((review, i) => (
+                                    <Box key={i} sx={{ border: '1px solid #D81B60', p: 2, borderRadius: '16px', width: '100%', mb: 3 }}>
                                         <Grid container spacing={1}>
                                             {/* User and Rating Section */}
                                             <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>

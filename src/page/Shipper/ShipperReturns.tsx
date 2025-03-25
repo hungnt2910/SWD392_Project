@@ -35,7 +35,7 @@ interface Order {
     amount: number;
     shippingAddress: string;
     timestamp: string;
-    orderDetails: OrderDetail[];
+    returnOrderDetails: OrderDetail[];
     receiverName: string,
     phoneNumber: number
 }
@@ -59,6 +59,7 @@ const ShipperReturns = () => {
         }
     };
 
+    console.log(orders)
     useEffect(() => {
         fetchOrders();
     }, []);
@@ -146,7 +147,7 @@ const ShipperReturns = () => {
                                                 </TableRow>
                                             </TableHead>
                                             <TableBody>
-                                                {order.orderDetails.map((detail) => (
+                                                {order.returnOrderDetails.map((detail) => (
                                                     <TableRow key={detail.orderDetailId} sx={{ "&:hover": { backgroundColor: "#E3F2FD" } }}>
                                                         <TableCell sx={{ textAlign: "center" }}>{detail.productName}</TableCell>
                                                         <TableCell sx={{ textAlign: "center" }}>{formatMoney(detail.price)}</TableCell>

@@ -18,8 +18,8 @@ function HomePage() {
     const [open, setOpen] = useState(false);
     const [confirmOpen, setConfirmOpen] = useState(false);
     const token = localStorage.getItem('token');
-    const decode = token ? jwtDecode<{ userId: number }>(token) : null;
-    const skinTypeId = localStorage.getItem('skinTypeId')
+    const decode = token ? jwtDecode<{ userId: number, skinType: number }>(token) : null;
+    const skinTypeId = decode?.skinType || localStorage.getItem('skinTypeId')
 
     const handleChatClick = () => {
         setConfirmOpen(true);
@@ -48,7 +48,8 @@ function HomePage() {
 
             <Voucher />
 
-            {!skinTypeId ?
+            {!skinTypeId && !token ?
+
                 <Box sx={{ px: 7, my: 5 }}>
                     <Card>
                         <CardMedia component="img" height="500" image={media} alt="Ưu đãi skincare" />
@@ -139,7 +140,7 @@ function HomePage() {
                     </Button>
                 </DialogActions>
             </Dialog>
-        </div>
+        </div >
     );
 }
 
