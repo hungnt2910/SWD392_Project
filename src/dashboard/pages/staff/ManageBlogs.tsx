@@ -45,6 +45,7 @@ interface Blog {
   postDate: string
   product_id?: number
   user_id?: number
+  userId: number
   user?: {
     id: string
     username: string
@@ -116,7 +117,7 @@ const ManageBlogs = () => {
       const response = await axios.get(`${portserver}/blogs`, {
         headers: { "Authorization": `Bearer ${localStorage.getItem("token")}` },
       });
-
+      setBlogs(response.data.map((blog: any) => ({ ...blog, postId: Number(blog.postId), userId: Number(blog.user?.id) })));
       setBlogs(response.data.map((blog: any) => ({ ...blog, postId: Number(blog.postId), userId: blog.user?.id })));
     } catch (err) {
       console.error("Error fetching blogs:", err);
