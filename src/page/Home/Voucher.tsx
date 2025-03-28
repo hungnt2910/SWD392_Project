@@ -166,7 +166,7 @@ const Voucher: React.FC = () => {
     }, [decode?.userId]);
 
     return (
-        <Box sx={{ px: 9, py: 5 }}>
+        <Box sx={{ px: 7, py: 5 }}>
             <ToastContainer />
             <Box sx={{ background: "linear-gradient(to bottom, #FFEBEE, #FFCDD2)", borderRadius: "16px", p: 3 }}>
                 <Typography variant="h4" sx={{ mb: 3, color: "#D81B60", fontWeight: "bold" }}>
@@ -193,7 +193,7 @@ const Voucher: React.FC = () => {
                     <Slider {...settings}>
                         {vouchers.map((voucher) => (
                             <Box key={voucher.voucherId} px={1} sx={{ alignItems: 'center', justifyContent: 'center', }}>
-                                <Card sx={{ maxWidth: 300, alignItems: 'center', justifyContent: 'center', borderRadius: "16px", boxShadow: 3, backgroundColor: "#FFD1DC" }}>
+                                <Card sx={{ maxWidth: 500, alignItems: 'center', justifyContent: 'center', borderRadius: "16px", boxShadow: 3, backgroundColor: "#FFD1DC" }}>
                                     <CardContent sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
                                         <Typography variant="h6" gutterBottom sx={{ display: "flex", alignItems: "center", color: "#C2185B" }}>
                                             <LocalOffer sx={{ mr: 1 }} /> Code: {voucher.code}

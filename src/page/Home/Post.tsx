@@ -128,7 +128,7 @@ const Post: React.FC = () => {
                                                 }}
                                                 onClick={() => { handleDetailPost(b.postId) }}
                                             >
-                                                <Typography variant="h4" sx={{ fontWeight: "bold", color: "#d81b60", mb: 2 }}>
+                                                <Typography variant="h6" sx={{ fontWeight: "bold", color: "#d81b60", mb: 2 }}>
                                                     {b.title.replace(/<[^>]*>/g, "")}
                                                 </Typography>
                                             </Button>

@@ -22,7 +22,7 @@ import { useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { portserver } from "../../../utils/portserver";
-import {jwtDecode} from "jwt-decode";
+import { jwtDecode } from "jwt-decode";
 import BlogDetailsModal from "./BlogDetails"
 import { Visibility } from "@mui/icons-material"
 
@@ -233,7 +233,28 @@ const ManageBlogs = () => {
   };
   const columns: GridColDef<Blog>[] = [
     { field: "postId", headerName: "Post ID", flex: 0.5, minWidth: 60, headerAlign: "center", align: "center" },
-    { field: "title", headerName: "Title", flex: 1, minWidth: 150, headerAlign: "center", align: "center" },
+    // { field: "title", headerName: "Title", flex: 1, minWidth: 150, headerAlign: "center", align: "center" },
+
+    {
+      field: "title",
+      headerName: "Title",
+      flex: 1,
+      minWidth: 150,
+      headerAlign: "center",
+      align: "center",
+      renderCell: (params) => (
+        <div
+          style={{
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            whiteSpace: "nowrap",
+            maxWidth: "100%",
+          }}
+        >
+          {params.value ? params.value.replace(/<[^>]*>/g, "") : ""}
+        </div>
+      ),
+    },
     {
       field: "description",
       headerName: "Description",
@@ -405,7 +426,7 @@ const ManageBlogs = () => {
         />
         <TextField label="Image URL" value={image_url} onChange={(e) => setImageUrl(e.target.value)} fullWidth sx={{ mt: 2, mb: 2 }} />
         <Box display="flex" justifyContent="flex-end">
-          <Button variant="contained" color="secondary"  onClick={() => window.location.reload()} sx={{ mr: 2 }}>
+          <Button variant="contained" color="secondary" onClick={() => window.location.reload()} sx={{ mr: 2 }}>
             Cancel
           </Button>
           <Button variant="contained" color="primary" onClick={handleCreateOrUpdateBlog}>
@@ -438,7 +459,7 @@ const ManageBlogs = () => {
           },
         }}
       />
-       <BlogDetailsModal blog={selectedBlog} open={detailsModalOpen}
+      <BlogDetailsModal blog={selectedBlog} open={detailsModalOpen}
         onClose={() => setDetailsModalOpen(false)} />
     </Box>
   );
